@@ -7,6 +7,7 @@
       <div class="status" style="margin: 1vw 0;">状态：{{ status }}</div>
       <div class="status">网卡： {{ equipment.mac || '' }}</div>
       <div class="status">IP： {{ equipment.wlanIp }}</div>
+      <div class="status">PTP： {{ equipment.ptpStatus }}</div>
     </div>
   </Transition>
 
@@ -46,10 +47,10 @@ onMounted(() => {
 <style lang="less" scoped>
 .info {
   width: 90vw;
-  height: 32vw;
+  height: 36vw;
   background-color: #272934;
   border-radius: 3vw;
-  padding: 5vw;
+  padding: 3vw 5vw;
   text-align: left;
   box-sizing: border-box;
   margin: 0 auto;
