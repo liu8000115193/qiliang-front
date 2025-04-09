@@ -58,7 +58,7 @@
     <div class="scan_menus">
       <div class="scan_menu" :class="[params.scanMode === 0 ? 'scan_menu_active' : '']" @click="HandleParams(0)">快速
       </div>
-      <div class="scan_menu" :class="[params.scanMode === 1 ? 'scan_menu_active' : '']" @click="HandleParams(1)">标准
+      <div class="scan_menu" :class="[params.scanMode === 900 ? 'scan_menu_active' : '']" @click="HandleParams(900)">标准
       </div>
       <div class="scan_menu" :class="[params.scanMode === 2 ? 'scan_menu_active' : '']" @click="HandleParams(2)">高密
       </div>
@@ -109,7 +109,9 @@ import Code from './components/Code.vue';
 import { Switch, Field, CountDown, Circle, showNotify, showConfirmDialog } from 'vant';
 import SimpleKeyboard from "@/components/Keyboard.vue";
 import { scanning, getScanType, getSetting, updateSetting, wakeScreen, stopScan, getEquipment } from '@/service/use';
-
+// let timeArr = {
+//   900:[165 * 1000,165 * 1000,165 * 1000]
+// }
 onMounted(() => {
   GetScanResult()
   GetInfoByInterVal()
@@ -162,7 +164,7 @@ function HandleScan() {
   })
 }
 // 扫描进度
-let rate = computed(() => 100 - (time.value / timeArr[params.colorSwitch ? 1 : 0][params.scanMode] * 100))
+let rate = computed(() => 100 - (time.value / timeArr[params.scanMode][params.colorSwitch ? 1 : 0] * 100))
 // 处理耗时显示
 function HandleTime() {
   timer1 = setInterval(() => {
@@ -204,9 +206,11 @@ function GetScanResult() {
     originParams = p
   })
   getScanType(params.name + "_" + params.index).then(res => {
+    let t = timeArr[params.scanMode]
+    let index = params.colorSwitch ? 1 : 0
     if (res.data.isScanning) {
       if (!showTime.value) {
-        time.value = timeArr[params.colorSwitch ? 1 : 0][params.scanMode] - res.data.startTime
+        time.value = t[index] - res.data.startTime
         showTime.value = true
         status.value = statusArr[1]
         HandleTime()
@@ -214,7 +218,9 @@ function GetScanResult() {
       }
     } else if (res.data.isFinish) {
       clearInterval(timer1)
-      time.value = timeArr[params.colorSwitch ? 1 : 0][params.scanMode]
+      
+      time.value = t[index]
+      console.log('t :>> ', t[index]);
       showTime.value = false
       loading.value = false
       status.value = statusArr[0]
@@ -231,7 +237,7 @@ function GetScanResult() {
       }
     } else if (res.data.isError) {
       clearInterval(timer1)
-      time.value = timeArr[params.colorSwitch ? 1 : 0][params.scanMode]
+      time.value = t[index]
       showTime.value = false
       loading.value = false
       status.value = statusArr[0]
@@ -294,7 +300,11 @@ function HandleDenoise() {
   showDenoisePopup.value = true
 }
 
-let modeArr = ['快速', '标准', '高密']
+let modeArr = {
+  0:'快速', 
+  900:'标准', 
+  2:'高密'
+}
 function HandleParams(value) {
   console.log('value instanceof Number :>> ',);
   if (typeof value == 'number') {
