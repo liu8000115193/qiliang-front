@@ -1,6 +1,6 @@
 <template>
   <Transition name="custom-classes" enter-active-class="animate__animated animate__fadeInUp" leave-active-class="animate__animated animate__fadeOutDown">
-    <div v-if="showInfo" class="info">
+    <div v-if="showInfo" class="info" ref="htmlRefHook">
       <div class="status">存储：存储{{ stat.fileNum }}站，空间使用<span style="color: #2AC840;">{{ parseInt(stat.usedSize / 1024 /
         1024 / 1024) }}</span>
         /{{ parseInt(stat.totalSize / 1024 / 1024 / 1024) }}G</div>
@@ -15,9 +15,12 @@
 </template>
 
 <script lang="ts" setup>
-import { getStat } from '@/service/use';
+import { getStat,startRotate } from '@/service/use';
+import { showConfirmDialog } from 'vant';
+import { onLongPress } from '@vueuse/core'
+import { onMounted } from 'vue'
 
-const props = defineProps(['showInfo','equipment'])
+const props = defineProps(['showInfo','equipment','isRotate'])
 const emits = defineEmits(['update:showInfo'])
 // let equipment = ref({})
 let stat = ref({})
@@ -42,6 +45,37 @@ function HandleInfo() {
 onMounted(() => {
   GetInfo()
 })
+
+let timer: any = null
+
+let htmlRefHook = ref()
+onLongPress(
+  htmlRefHook,
+  HandleRotate,
+  {
+    modifiers: {
+      prevent: true
+    }
+  }
+)
+function HandleRotate(e: PointerEvent) {
+  showConfirmDialog({
+    title: '提示',
+    message:
+      `是否${props.isRotate ? '退出' : '进入'}展示模式？`,
+  })
+    .then(() => {
+      startRotate(props.isRotate).then(res =>{
+        if (res.code == 0) {
+          emits('update:isRotate', !props.isRotate)
+        }
+      })
+    })
+}
+
+function clearTimer() {
+  clearTimeout(timer)
+}
 </script>
 
 <style lang="less" scoped>

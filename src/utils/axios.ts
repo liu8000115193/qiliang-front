@@ -1,9 +1,10 @@
 import axios, { AxiosInstance } from "axios";
+import {showNotify } from 'vant';
 
 console.log('import.meta.env :>> ', import.meta.env);
 // 创建axios实例
 const service: AxiosInstance = axios.create({
-  baseURL: import.meta.env.DEV ? 'http://192.168.0.153:9996' : `http://${location.host}:9996`,
+  baseURL: import.meta.env.DEV ? 'http://192.168.0.143:9996' : `http://${location.host}:9996`,
   timeout: 120000,
   // paramsSerializer: function (params) {
   //   return Qs.stringify(params, { arrayFormat: "brackets" });
@@ -24,6 +25,14 @@ service.interceptors.request.use(
 // 响应拦截器
 service.interceptors.response.use(
   response => {
+    console.log('response.data :>> ', response.data);
+    if (response.data.code !== 0) {
+      showNotify({
+        type: 'danger',
+        message: response.data.msg
+      })
+      return Promise.reject(response.data);
+    }
     return Promise.resolve(response.data);
   },
   error => {

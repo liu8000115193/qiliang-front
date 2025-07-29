@@ -33,11 +33,28 @@ export function getSetting(){
   })
 }
 
+export function getNotify(){
+  return request({
+    url: `/scanner/notify`,
+    method: "GET"
+  })
+}
+
+export function deleteNotify(type:string){
+  return request({
+    url: `/scanner/notify`,
+    method: "DELETE",
+    params:{
+      type
+    }
+  })
+}
+
 export function updateSetting(params){
   return request({
     url: `/setting`,
     method: "PUT",
-    params
+    data:params
   })
 }
 
@@ -108,5 +125,15 @@ export function connectWifi(params){
     url: `/wifi/connect`,
     method: "POST",
     params
+  })
+}
+
+export function startRotate(isRotate:boolean){
+  return request({
+    url: `/rotate`,
+    method: "GET",
+    params:{
+      isRotate
+    }
   })
 }

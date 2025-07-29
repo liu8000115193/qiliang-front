@@ -1,7 +1,13 @@
 <template>
   <main class="table">
-
+    <div style="position: fixed;top: 5vh;left: 0;width: 100vw;box-sizing: border-box;text-align: left;z-index: 999;">
+      <NoticeBar v-if="warningInfo.length > 0" mode="closeable" style="margin-bottom: 20px;" left-icon="warning-o"
+         wrapable :text="warningInfo.join('\n')" @close="CloseNotify('warning')" />
+      <NoticeBar v-if="primaryInfo.length > 0" mode="closeable" color="#1989fa" background="#ecf9ff" left-icon="info-o" 
+         wrapable :text="primaryInfo.join('\n')" @close="CloseNotify('info')" />
+    </div>
     <Head @update="GetEquipment"></Head>
+
     <div v-if="!showInfo">
       <img class="alpcer" src="@/assets/alpcer.svg">
     </div>
@@ -26,32 +32,31 @@
       </div>
     </div>
     <div class="switch_menus">
-      <div @click="HandleColor">
+      <div @click="HandleColor" class="mr-3">
         <div class="switch_menu">
           <img class="menu_icon" src="@/assets/color.svg">
-          <div @click.stop="" class="mt-3">
-            <Switch v-model="params.colorSwitch" size="3vw"></Switch>
-            <!-- <input class="switch" type="checkbox" :checked="params.colorSwitch"></input> -->
+          <div class="mt-3">
+            <Switch :model-value="params.colorSwitch" size="3vw"></Switch>
           </div>
         </div>
         <div class="mt-3">彩色扫描</div>
       </div>
-      <div @click="HandleScanMode">
+      <div @click="HandleScanMode" class="mr-3">
         <div class="switch_menu">
           <img class="menu_icon" src="@/assets/speed.svg">
           <div class="mt-3">{{ modeArr[params.scanMode] }}</div>
         </div>
         <div class="mt-3">扫描速度</div>
       </div>
-      <div @click="HandleDenoise">
+      <div @click="HandleDenoise" class="mr-3">
         <div class="switch_menu">
           <img class="menu_icon" src="@/assets/setting.svg">
           <div class="mt-3 text-ellipsis">{{ denoiseVal }}</div>
         </div>
-        <div class="mt-3">去噪设置</div>
+        <div class="mt-3">更多设置</div>
       </div>
     </div>
-    <MoreInfo v-model:showInfo="showInfo" :equipment="equipment"></MoreInfo>
+    <MoreInfo v-model:isRotate="isRotate" v-model:showInfo="showInfo" :equipment="equipment"></MoreInfo>
   </main>
   <!--扫描速度设置-->
   <Popup v-model:showPopup="showPopup" title="彩色扫描">
@@ -66,7 +71,7 @@
   </Popup>
 
   <!--去噪设置-->
-  <Popup v-model:showPopup="showDenoisePopup" title="去噪设置">
+  <Popup v-model:showPopup="showDenoisePopup" title="更多设置">
     <div class="scan_menus">
       <div class="scan_menu" :class="[params.stitchDenoise ? 'scan_menu_active' : '']"
         @click="HandleParams('stitchDenoise')">黏连
@@ -77,6 +82,15 @@
       <div class="scan_menu" :class="[params.otherDenoise ? 'scan_menu_active' : '']"
         @click="HandleParams('otherDenoise')">其他
       </div>
+      <div class="scan_menu">
+        <div>倾角仪开关</div>
+        <Switch v-model="params.inclinometerSwitch" size="3vw"></Switch>
+      </div>
+      <div class="scan_menu">
+        <div>HDR</div>
+        <Switch v-model="params.hdrMode" size="3vw" @change="HandleParams('hdrMode')"></Switch>
+      </div>
+
     </div>
   </Popup>
 
@@ -94,7 +108,7 @@
     <div class="text_popup" @click="HandleKeyboard('index')">
       <div>序号:</div>
       <Field contenteditable="true" style="font-size: 5vw;width: 50vw;background: #000;color: #fff;opacity: 1;"
-      v-model="params.index" readonly></Field>
+        v-model="params.index" readonly></Field>
     </div>
   </Popup>
   <SimpleKeyboard v-model:showNumber="showIndexPopup" v-if="showKeyboard" v-model:showKeyboard="showKeyboard"
@@ -106,12 +120,12 @@ import Head from './components/Head.vue'
 import MoreInfo from './components/MoreInfo.vue';
 import Popup from '@/components/Popup.vue';
 import Code from './components/Code.vue';
-import { Switch, Field, CountDown, Circle, showNotify, showConfirmDialog } from 'vant';
+import { Switch, Field, CountDown, Circle, showNotify, showConfirmDialog, NoticeBar } from 'vant';
 import SimpleKeyboard from "@/components/Keyboard.vue";
-import { scanning, getScanType, getSetting, updateSetting, wakeScreen, stopScan, getEquipment } from '@/service/use';
-// let timeArr = {
-//   900:[165 * 1000,165 * 1000,165 * 1000]
-// }
+import { scanning, getScanType, getSetting, updateSetting, wakeScreen, stopScan, getEquipment, getNotify,deleteNotify } from '@/service/use';
+// 关闭彩色，hdr；开启彩色；开启彩色，hdr
+const timeArr = [[65 * 1000, 82 * 1000, 120 * 1000],[77 * 1000, 96 * 1000, 153 * 1000],[132 * 1000, 155 * 1000, 216 * 1000]]
+let isRotate = ref(false)
 onMounted(() => {
   GetScanResult()
   GetInfoByInterVal()
@@ -119,7 +133,7 @@ onMounted(() => {
 })
 // 获取设备信息
 let equipment = ref({})
-function GetEquipment(){
+function GetEquipment() {
   getEquipment().then(res => {
     equipment.value = res.data
   })
@@ -144,10 +158,22 @@ let denoiseVal = computed(() => {
 
 // 扫描
 let loading = ref(false)
-let time = ref(0)
+// let time = ref(0)
+let time = computed(() => {
+  let arr = timeArr[(params.colorSwitch ? 1 : 0 ) + (params.hdrMode ? 1 : 0 )][params.scanMode] 
+  return showTime.value ? arr - startTime.value - calcTime.value : arr
+})
 let countDown = ref()
 let showTime = ref(false)
 function HandleScan() {
+  if (isRotate.value) {
+    showNotify({
+      type: 'warning',
+      message: '请先退出展示模式',
+      duration: 1500,
+    })
+    return
+  }
   loading.value = true
   scanning(params).then((res) => {
     if (res.code == -5) {
@@ -164,21 +190,27 @@ function HandleScan() {
   })
 }
 // 扫描进度
-let rate = computed(() => 100 - (time.value / timeArr[params.scanMode][params.colorSwitch ? 1 : 0] * 100))
+let rate = computed(() => 100 - (time.value / timeArr[(params.colorSwitch ? 1 : 0 )+ params.hdrMode][params.scanMode] * 100))
 // 处理耗时显示
+let calcTime = ref(0)
 function HandleTime() {
   timer1 = setInterval(() => {
-    time.value = time.value - 1000 > 0 ? time.value - 1000 : 0
-    console.log('time.value :>> ', time.value);
+    if (calcTime.value < timeArr[(params.colorSwitch ? 1 : 0 ) + (params.hdrMode ? 1 : 0 )][params.scanMode] - startTime.value - 1000) {
+      calcTime.value += 1000
+    } else {
+      calcTime.value = timeArr[(params.colorSwitch ? 1 : 0 ) + (params.hdrMode ? 1 : 0 )][params.scanMode] - startTime.value
+    }
   }, 1000)
 }
 
 let timer, timer1 = null
 // 定时轮询获取参数设置
 function GetInfoByInterVal() {
-  clearInterval(timer)
-  timer = setInterval(() => {
-    GetScanResult()
+  clearTimeout(timer)
+  GetScanResult()
+  GetNotify()
+  timer = setTimeout(() => {
+    GetInfoByInterVal()
   }, 2000);
 }
 
@@ -191,7 +223,9 @@ let params = reactive({
   colorSwitch: false,
   rainFogDenoise: 0,
   otherDenoise: 0,
-  stitchDenoise: 0
+  stitchDenoise: 0,
+  inclinometerSwitch:false,
+  hdrMode:false
 })
 let needTip = ref(false)
 let startTime = ref(0)
@@ -206,11 +240,10 @@ function GetScanResult() {
     originParams = p
   })
   getScanType(params.name + "_" + params.index).then(res => {
-    let t = timeArr[params.scanMode]
-    let index = params.colorSwitch ? 1 : 0
+    
     if (res.data.isScanning) {
       if (!showTime.value) {
-        time.value = t[index] - res.data.startTime
+        startTime.value = res.data.startTime
         showTime.value = true
         status.value = statusArr[1]
         HandleTime()
@@ -218,13 +251,12 @@ function GetScanResult() {
       }
     } else if (res.data.isFinish) {
       clearInterval(timer1)
-      
-      time.value = t[index]
-      console.log('t :>> ', t[index]);
       showTime.value = false
       loading.value = false
+      calcTime.value = 0
       status.value = statusArr[0]
       if (needTip.value) {
+        deleteNotify('info')
         wakeScreen()
         showNotify({
           type: 'success',
@@ -233,13 +265,12 @@ function GetScanResult() {
         })
         needTip.value = false
         params.index = (parseInt(res.data.index) + 1).toString().padStart(3, '0')
-
       }
     } else if (res.data.isError) {
       clearInterval(timer1)
-      time.value = t[index]
       showTime.value = false
       loading.value = false
+      calcTime.value = 0
       status.value = statusArr[0]
       if (needTip.value) {
         wakeScreen()
@@ -277,7 +308,7 @@ let handleKeyboardInput = (input) => {
 }
 // 显示键盘并清除定时器
 function HandleKeyboard(key) {
-  clearInterval(timer)
+  clearTimeout(timer)
   showKeyboard.value = true
   paramKey.value = key
   params[key] = ''
@@ -285,7 +316,9 @@ function HandleKeyboard(key) {
 
 // 设置彩色扫描
 function HandleColor() {
+  clearTimeout(timer)
   params.colorSwitch = !params.colorSwitch
+  params.hdrMode = params.colorSwitch ? params.hdrMode : false
 }
 
 // 设置扫描速度
@@ -311,6 +344,10 @@ function HandleParams(value) {
     params.scanMode = value
 
   } else {
+    if (value == 'hdrMode') {
+      params.colorSwitch = params.hdrMode ? true : params.colorSwitch
+      return
+    }
     if (params[value] == 0) params[value] = 1
     else params[value] = 0
   }
@@ -330,19 +367,14 @@ function StopScan() {
 }
 
 // 监听参数变化，更新到数据库
-let updateSettingTimer
 watch(params, (newValue, oldValue) => {
-  console.log('newValue :>> ', newValue);
-  console.log('originParams :>> ', params.name);
   if (!showKeyboard.value && newValue.name != '' && newValue.index != '' && !isNaN(Number(newValue.index, 10))) {
     Object.keys(newValue).forEach(x => {
       if (newValue[x] !== originParams[x]) {
-        clearTimeout(updateSettingTimer)
-        clearInterval(timer)
+        clearTimeout(timer)
         updateSetting(newValue).then(res => {
           GetInfoByInterVal()
         })
-        console.log('执行update :>> ', x);
         return;
       }
     })
@@ -357,7 +389,7 @@ watch(showKeyboard, (newValue, oldValue) => {
     if (params.name != '' && params.index != '' && !isNaN(Number(params.index, 10))) {
       updateSetting(params)
     }
-    clearInterval(timer)
+    clearTimeout(timer)
     GetInfoByInterVal()
   }
 })
@@ -371,7 +403,33 @@ watch(showIndexPopup, (newValue, oldValue) => {
 watch(showNamePopup, (newValue, oldValue) => {
   if (!newValue) {
     showKeyboard.value = false
-  } 14
+  }
+})
+
+
+
+let warningInfo = ref([])
+let primaryInfo = ref([])
+function GetNotify() {
+  getNotify().then(res => {
+    if (res.data) {
+      warningInfo.value = res.data.warning ? res.data.warning : []
+      primaryInfo.value = res.data.info ? res.data.info : []
+    }
+  })
+}
+function CloseNotify(type) {
+  if (type == 'warning') {
+    warningInfo.value = []
+  } else {
+    primaryInfo.value = []
+  }
+  deleteNotify(type)
+}
+
+onUnmounted(() => {
+  clearTimeout(timer)
+  clearInterval(timer1)
 })
 </script>
 <style lang="less" scoped>
@@ -455,14 +513,24 @@ watch(showNamePopup, (newValue, oldValue) => {
 
 .scan_menus {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
 
   .scan_menu {
     width: 27vw;
     height: 16vw;
     background: #262A34;
     border-radius: 3vw;
-    line-height: 16vw;
+    // line-height: 16vw;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    margin-bottom: 3vw;
+    margin-right: 10px;
+
+    &:nth-child(3n) {
+      margin-right: 0;
+    }
 
     &_active {
       border: 1px solid #fff;
@@ -472,6 +540,10 @@ watch(showNamePopup, (newValue, oldValue) => {
 
 .mt-3 {
   margin-top: 3vw;
+}
+
+.mr-3 {
+  margin-right: 3vw;
 }
 
 .text_popup {

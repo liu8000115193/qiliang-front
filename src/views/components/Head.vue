@@ -75,6 +75,7 @@ function UpdateIp(){
 
 <style lang="less" scoped>
 .navbar {
+  padding: 10px 10px 0 0;
   position: relative;
   width: 100vw;
   left: 0;
