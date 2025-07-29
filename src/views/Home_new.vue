@@ -199,7 +199,6 @@ function HandleTime() {
       calcTime.value += 1000
     } else {
       calcTime.value = timeArr[(params.colorSwitch ? 1 : 0 ) + (params.hdrMode ? 1 : 0 )][params.scanMode] - startTime.value
-      clearInterval(timer1)
     }
   }, 1000)
 }
@@ -254,8 +253,10 @@ function GetScanResult() {
       clearInterval(timer1)
       showTime.value = false
       loading.value = false
+      calcTime.value = 0
       status.value = statusArr[0]
       if (needTip.value) {
+        deleteNotify('info')
         wakeScreen()
         showNotify({
           type: 'success',
@@ -269,6 +270,7 @@ function GetScanResult() {
       clearInterval(timer1)
       showTime.value = false
       loading.value = false
+      calcTime.value = 0
       status.value = statusArr[0]
       if (needTip.value) {
         wakeScreen()
@@ -421,12 +423,9 @@ function CloseNotify(type) {
   deleteNotify(type)
 }
 
-watch(primaryInfo, (newValue, oldValue) => {
-  if (primaryInfo.value.length > 0) {
-    setTimeout(() =>{
-      deleteNotify('info')
-    },3000)
-  }
+onUnmounted(() => {
+  clearTimeout(timer)
+  clearInterval(timer1)
 })
 </script>
 <style lang="less" scoped>

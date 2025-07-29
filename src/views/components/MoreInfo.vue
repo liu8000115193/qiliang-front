@@ -7,6 +7,7 @@
       <div class="status" style="margin: 1vw 0;">状态：{{ status }}</div>
       <div class="status">网卡： {{ equipment.mac || '' }}</div>
       <div class="status">IP： {{ equipment.wlanIp }}</div>
+      <!-- <div class="status">PTP： {{ equipment.ptpStatus }}</div> -->
     </div>
   </Transition>
 
@@ -17,7 +18,7 @@
 import { getStat,startRotate } from '@/service/use';
 import { showConfirmDialog } from 'vant';
 import { onLongPress } from '@vueuse/core'
-import { onMounted, useTemplateRef } from 'vue'
+import { onMounted } from 'vue'
 
 const props = defineProps(['showInfo','equipment','isRotate'])
 const emits = defineEmits(['update:showInfo'])

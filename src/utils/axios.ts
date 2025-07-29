@@ -25,7 +25,7 @@ service.interceptors.request.use(
 // 响应拦截器
 service.interceptors.response.use(
   response => {
-    console.log('response.data :>> ', response.data.msg);
+    console.log('response.data :>> ', response.data);
     if (response.data.code !== 0) {
       showNotify({
         type: 'danger',
