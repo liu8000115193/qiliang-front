@@ -63,7 +63,7 @@
     <div class="scan_menus">
       <div class="scan_menu" :class="[params.scanMode === 0 ? 'scan_menu_active' : '']" @click="HandleParams(0)">快速
       </div>
-      <div class="scan_menu" :class="[params.scanMode === 900 ? 'scan_menu_active' : '']" @click="HandleParams(900)">标准
+      <div class="scan_menu" :class="[params.scanMode === 1 ? 'scan_menu_active' : '']" @click="HandleParams(1)">标准
       </div>
       <div class="scan_menu" :class="[params.scanMode === 2 ? 'scan_menu_active' : '']" @click="HandleParams(2)">高密
       </div>
@@ -73,7 +73,7 @@
   <!--去噪设置-->
   <Popup v-model:showPopup="showDenoisePopup" title="更多设置">
     <div class="scan_menus">
-      <div class="scan_menu" :class="[params.stitchDenoise ? 'scan_menu_active' : '']"
+      <!-- <div class="scan_menu" :class="[params.stitchDenoise ? 'scan_menu_active' : '']"
         @click="HandleParams('stitchDenoise')">黏连
       </div>
       <div class="scan_menu" :class="[params.rainFogDenoise ? 'scan_menu_active' : '']"
@@ -81,7 +81,7 @@
       </div>
       <div class="scan_menu" :class="[params.otherDenoise ? 'scan_menu_active' : '']"
         @click="HandleParams('otherDenoise')">其他
-      </div>
+      </div> -->
       <div class="scan_menu">
         <div>倾角仪开关</div>
         <Switch v-model="params.inclinometerSwitch" size="3vw"></Switch>
@@ -221,9 +221,6 @@ let params = reactive({
   index: '',
   scanMode: 0,
   colorSwitch: false,
-  rainFogDenoise: 0,
-  otherDenoise: 0,
-  stitchDenoise: 0,
   inclinometerSwitch:false,
   hdrMode:false
 })
@@ -333,11 +330,11 @@ function HandleDenoise() {
   showDenoisePopup.value = true
 }
 
-let modeArr = {
-  0:'快速', 
-  900:'标准', 
-  2:'高密'
-}
+let modeArr = [
+  '快速', 
+  '标准', 
+  '高密'
+]
 function HandleParams(value) {
   console.log('value instanceof Number :>> ',);
   if (typeof value == 'number') {
