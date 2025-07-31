@@ -88,7 +88,7 @@
       </div>
       <div class="scan_menu">
         <div>HDR</div>
-        <Switch v-model="params.hdrMode" size="3vw" @change="HandleParams('hdrMode')"></Switch>
+        <Switch v-model="params.hdrMode" size="3vw"></Switch>
       </div>
 
     </div>
@@ -124,8 +124,21 @@ import { Switch, Field, CountDown, Circle, showNotify, showConfirmDialog, Notice
 import SimpleKeyboard from "@/components/Keyboard.vue";
 import { scanning, getScanType, getSetting, updateSetting, wakeScreen, stopScan, getEquipment, getNotify,deleteNotify } from '@/service/use';
 // 关闭彩色，hdr；开启彩色；开启彩色，hdr
-const timeArr = [[65 * 1000, 82 * 1000, 120 * 1000],[77 * 1000, 96 * 1000, 153 * 1000],[132 * 1000, 155 * 1000, 216 * 1000]]
+const timeArr = [[65 * 1000, 82 * 1000, 120 * 1000],[77 * 1000, 96 * 1000, 153 * 1000],[132 * 1000, 155 * 1000, 216 * 1000],[100 * 1000, 115 * 1000, 158 * 1000]]
 let isRotate = ref(false)
+
+let params = reactive({
+  name: 'Scan',
+  index: '',
+  scanMode: 0,
+  colorSwitch: false,
+  rainFogDenoise: 0,
+  otherDenoise: 0,
+  stitchDenoise: 0,
+  inclinometerSwitch:false,
+  hdrMode:false
+})
+
 onMounted(() => {
   GetScanResult()
   GetInfoByInterVal()
@@ -158,10 +171,21 @@ let denoiseVal = computed(() => {
 
 // 扫描
 let loading = ref(false)
-// let time = ref(0)
+let chooseTime = ref(timeArr[0][params.scanMode])
 let time = computed(() => {
-  let arr = timeArr[(params.colorSwitch ? 1 : 0 ) + (params.hdrMode ? 1 : 0 )][params.scanMode] 
-  return showTime.value ? arr - startTime.value - calcTime.value : arr
+  if (params.colorSwitch) {
+    if (params.hdrMode) {
+      chooseTime.value = timeArr[2][params.scanMode]
+    } else {
+      chooseTime.value = timeArr[1][params.scanMode]
+    }
+  } else if (params.hdrMode) {
+    chooseTime.value = timeArr[3][params.scanMode]
+  } else {
+    chooseTime.value = timeArr[0][params.scanMode]
+  }
+  // let arr = timeArr[(params.colorSwitch ? 1 : 0 ) + (params.hdrMode ? 1 : 0 )][params.scanMode] 
+  return showTime.value ? chooseTime.value - startTime.value - calcTime.value : chooseTime.value
 })
 let countDown = ref()
 let showTime = ref(false)
@@ -190,15 +214,15 @@ function HandleScan() {
   })
 }
 // 扫描进度
-let rate = computed(() => 100 - (time.value / timeArr[(params.colorSwitch ? 1 : 0 )+ params.hdrMode][params.scanMode] * 100))
+let rate = computed(() => 100 - (time.value / chooseTime.value * 100))
 // 处理耗时显示
 let calcTime = ref(0)
 function HandleTime() {
   timer1 = setInterval(() => {
-    if (calcTime.value < timeArr[(params.colorSwitch ? 1 : 0 ) + (params.hdrMode ? 1 : 0 )][params.scanMode] - startTime.value - 1000) {
+    if (calcTime.value < chooseTime.value - startTime.value - 1000) {
       calcTime.value += 1000
     } else {
-      calcTime.value = timeArr[(params.colorSwitch ? 1 : 0 ) + (params.hdrMode ? 1 : 0 )][params.scanMode] - startTime.value
+      calcTime.value = chooseTime.value - startTime.value
     }
   }, 1000)
 }
@@ -216,17 +240,6 @@ function GetInfoByInterVal() {
 
 const statusArr = ['待机状态', '采样状态', '错误状态', '自检状态', '电机启动状态', '升级状态', '就绪状态']
 let status = ref('待机状态')
-let params = reactive({
-  name: 'Scan',
-  index: '',
-  scanMode: 0,
-  colorSwitch: false,
-  rainFogDenoise: 0,
-  otherDenoise: 0,
-  stitchDenoise: 0,
-  inclinometerSwitch:false,
-  hdrMode:false
-})
 let needTip = ref(false)
 let startTime = ref(0)
 let originParams = {}
@@ -318,7 +331,6 @@ function HandleKeyboard(key) {
 function HandleColor() {
   clearTimeout(timer)
   params.colorSwitch = !params.colorSwitch
-  params.hdrMode = params.colorSwitch ? params.hdrMode : false
 }
 
 // 设置扫描速度
@@ -338,12 +350,7 @@ function HandleParams(value) {
   console.log('value instanceof Number :>> ',);
   if (typeof value == 'number') {
     params.scanMode = value
-
   } else {
-    if (value == 'hdrMode') {
-      params.colorSwitch = params.hdrMode ? true : params.colorSwitch
-      return
-    }
     if (params[value] == 0) params[value] = 1
     else params[value] = 0
   }
