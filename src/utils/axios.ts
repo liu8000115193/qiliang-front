@@ -25,6 +25,9 @@ service.interceptors.request.use(
 // 响应拦截器
 service.interceptors.response.use(
   response => {
+    if (response.data == '') {
+      return;
+    }
     console.log('response.data :>> ', response.data);
     if (response.data.code !== 0) {
       showNotify({
