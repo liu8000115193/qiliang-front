@@ -253,7 +253,6 @@ function GetScanResult() {
     originParams = p
   })
   getScanType(params.name + "_" + params.index).then(res => {
-    
     if (res.data.isScanning) {
       if (!showTime.value) {
         startTime.value = res.data.startTime
