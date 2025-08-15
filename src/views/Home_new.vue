@@ -73,15 +73,6 @@
   <!--去噪设置-->
   <Popup v-model:showPopup="showDenoisePopup" title="更多设置">
     <div class="scan_menus">
-      <!-- <div class="scan_menu" :class="[params.stitchDenoise ? 'scan_menu_active' : '']"
-        @click="HandleParams('stitchDenoise')">黏连
-      </div>
-      <div class="scan_menu" :class="[params.rainFogDenoise ? 'scan_menu_active' : '']"
-        @click="HandleParams('rainFogDenoise')">灰尘
-      </div>
-      <div class="scan_menu" :class="[params.otherDenoise ? 'scan_menu_active' : '']"
-        @click="HandleParams('otherDenoise')">其他
-      </div> -->
       <div class="scan_menu">
         <div>倾角仪开关</div>
         <Switch v-model="params.inclinometerSwitch" size="3vw"></Switch>
@@ -89,6 +80,10 @@
       <div class="scan_menu">
         <div>HDR</div>
         <Switch v-model="params.hdrMode" size="3vw" @change="HandleParams('hdrMode')"></Switch>
+      </div>
+      <div class="scan_menu">
+        <div>去噪</div>
+        <Switch v-model="params.driftFilter" size="3vw"></Switch>
       </div>
 
     </div>
@@ -222,7 +217,8 @@ let params = reactive({
   scanMode: 0,
   colorSwitch: false,
   inclinometerSwitch:false,
-  hdrMode:false
+  hdrMode:false,
+  driftFilter: false,
 })
 let needTip = ref(false)
 let startTime = ref(0)
