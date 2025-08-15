@@ -118,8 +118,9 @@ import Code from './components/Code.vue';
 import { Switch, Field, CountDown, Circle, showNotify, showConfirmDialog, NoticeBar } from 'vant';
 import SimpleKeyboard from "@/components/Keyboard.vue";
 import { scanning, getScanType, getSetting, updateSetting, wakeScreen, stopScan, getEquipment, getNotify,deleteNotify } from '@/service/use';
-// 关闭彩色，hdr；开启彩色；开启彩色，hdr
-const timeArr = [[65 * 1000, 82 * 1000, 120 * 1000],[77 * 1000, 96 * 1000, 153 * 1000],[132 * 1000, 155 * 1000, 216 * 1000]]
+// 关闭彩色，hdr；开启彩色；开启彩色，hdr；开启hdr
+const timeArr = [[75 * 1000, 101 * 1000, 158 * 1000],[101 * 1000, 151 * 1000, 266 * 1000],
+[157 * 1000, 208 * 1000, 325 * 1000],[113 * 1000, 138 * 1000, 193 * 1000]]
 let isRotate = ref(false)
 onMounted(() => {
   GetScanResult()
@@ -139,13 +140,13 @@ let showInfo = ref(false)
 // 去噪设置
 let denoiseVal = computed(() => {
   let arr = []
-  if (params.stitchDenoise) {
-    arr.push('黏连')
+  if (params.inclinometerSwitch) {
+    arr.push('倾角仪')
   }
-  if (params.rainFogDenoise) {
-    arr.push('灰尘')
+  if (params.hdrMode) {
+    arr.push('HDR')
   }
-  if (params.otherDenoise) {
+  if (params.driftFilter) {
     arr.push('其他')
   }
   return arr.toString() || '未设置'
@@ -153,10 +154,21 @@ let denoiseVal = computed(() => {
 
 // 扫描
 let loading = ref(false)
-// let time = ref(0)
+let chooseTime = ref(timeArr[0][params.scanMode])
 let time = computed(() => {
-  let arr = timeArr[(params.colorSwitch ? 1 : 0 ) + (params.hdrMode ? 1 : 0 )][params.scanMode] 
-  return showTime.value ? arr - startTime.value - calcTime.value : arr
+  if (params.colorSwitch) {
+    if (params.hdrMode) {
+      chooseTime.value = timeArr[2][params.scanMode]
+    } else {
+      chooseTime.value = timeArr[1][params.scanMode]
+    }
+  } else if (params.hdrMode) {
+    chooseTime.value = timeArr[3][params.scanMode]
+  } else {
+    chooseTime.value = timeArr[0][params.scanMode]
+  }
+  // let arr = timeArr[(params.colorSwitch ? 1 : 0 ) + (params.hdrMode ? 1 : 0 )][params.scanMode] 
+  return showTime.value ? chooseTime.value - startTime.value - calcTime.value : chooseTime.value
 })
 let countDown = ref()
 let showTime = ref(false)
@@ -190,10 +202,10 @@ let rate = computed(() => 100 - (time.value / timeArr[(params.colorSwitch ? 1 : 
 let calcTime = ref(0)
 function HandleTime() {
   timer1 = setInterval(() => {
-    if (calcTime.value < timeArr[(params.colorSwitch ? 1 : 0 ) + (params.hdrMode ? 1 : 0 )][params.scanMode] - startTime.value - 1000) {
+    if (calcTime.value < chooseTime.value - startTime.value - 1000) {
       calcTime.value += 1000
     } else {
-      calcTime.value = timeArr[(params.colorSwitch ? 1 : 0 ) + (params.hdrMode ? 1 : 0 )][params.scanMode] - startTime.value
+      calcTime.value = chooseTime.value - startTime.value
     }
   }, 1000)
 }
