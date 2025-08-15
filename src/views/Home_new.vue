@@ -118,6 +118,16 @@ import Code from './components/Code.vue';
 import { Switch, Field, CountDown, Circle, showNotify, showConfirmDialog, NoticeBar } from 'vant';
 import SimpleKeyboard from "@/components/Keyboard.vue";
 import { scanning, getScanType, getSetting, updateSetting, wakeScreen, stopScan, getEquipment, getNotify,deleteNotify } from '@/service/use';
+
+let params = reactive({
+  name: 'Scan',
+  index: '',
+  scanMode: 0,
+  colorSwitch: false,
+  inclinometerSwitch:false,
+  hdrMode:false,
+  driftFilter: false,
+})
 // 关闭彩色，hdr；开启彩色；开启彩色，hdr；开启hdr
 const timeArr = [[75 * 1000, 101 * 1000, 158 * 1000],[101 * 1000, 151 * 1000, 266 * 1000],
 [157 * 1000, 208 * 1000, 325 * 1000],[113 * 1000, 138 * 1000, 193 * 1000]]
@@ -223,15 +233,7 @@ function GetInfoByInterVal() {
 
 const statusArr = ['待机状态', '采样状态', '错误状态', '自检状态', '电机启动状态', '升级状态', '就绪状态']
 let status = ref('待机状态')
-let params = reactive({
-  name: 'Scan',
-  index: '',
-  scanMode: 0,
-  colorSwitch: false,
-  inclinometerSwitch:false,
-  hdrMode:false,
-  driftFilter: false,
-})
+
 let needTip = ref(false)
 let startTime = ref(0)
 let originParams = {}
