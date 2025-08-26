@@ -79,7 +79,7 @@
       </div>
       <div class="scan_menu">
         <div>HDR</div>
-        <Switch v-model="params.hdrMode" size="3vw" @change="HandleParams('hdrMode')"></Switch>
+        <Switch v-model="params.hdrMode" size="3vw"></Switch>
       </div>
       <div class="scan_menu">
         <div>去噪</div>
@@ -325,7 +325,6 @@ function HandleKeyboard(key) {
 function HandleColor() {
   clearTimeout(timer)
   params.colorSwitch = !params.colorSwitch
-  params.hdrMode = params.colorSwitch ? params.hdrMode : false
 }
 
 // 设置扫描速度
