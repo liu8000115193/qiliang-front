@@ -27,10 +27,6 @@ let stat = ref({})
 let status = ref('待机状态')
 // 设备信息
 function GetInfo() {
-  // getEquipment().then(res => {
-  //   equipment.value = res.data
-  // })
-
   getStat().then(res => {
     if (res.data) {
       stat.value = res.data

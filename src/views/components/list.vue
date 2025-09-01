@@ -1,6 +1,8 @@
 <template>
   <div class="table">
-
+    <div>存储{{ stat.fileNum }}站，空间使用<span style="color: #2AC840;">{{ parseInt(stat.usedSize / 1024 /
+        1024 / 1024) }}</span>
+        /{{ parseInt(stat.totalSize / 1024 / 1024 / 1024) }}G</div>
     <checkbox-group v-model="checked" shape="square">
       <checkbox v-for="item in list" :name="item.id" class="table_item" >
         <div style="display: flex;justify-content: space-between;color: #fff;">
@@ -20,10 +22,11 @@
 
 <script setup lang="ts">
 import { Checkbox, CheckboxGroup } from 'vant';
-import {getScanList,deleteScanItem} from '@/service/use'
+import {getScanList,deleteScanItem,getStat} from '@/service/use'
 
 onMounted(() => {
   GetList()
+  GetInfo()
 })
 let list = ref([])
 function GetList() {
@@ -55,6 +58,16 @@ function HandleDel(id = null) {
   })
   // 删除接口
 }
+
+// 设备信息
+let stat = ref({})
+function GetInfo() {
+  getStat().then(res => {
+    if (res.data) {
+      stat.value = res.data
+    }
+  })
+}
 </script>
 
 <style lang="less" scoped>
@@ -73,7 +86,7 @@ function HandleDel(id = null) {
     padding: 2vw;
     border-bottom: 1px solid #333;
     color: #fff;
-    font-size: 3.5vw;
+    font-size: 5vw;
     display: flex;
     width: auto;
 
@@ -94,14 +107,14 @@ function HandleDel(id = null) {
 
     &__all {
       color: #409eff;
-      font-size: 3.5vw;
+      font-size: 5vw;
       padding: 2vw 10vw;
       box-sizing: border-box;
     }
 
     &__del {
       color: #f56c6c;
-      font-size: 3.5vw;
+      font-size: 5vw;
       padding: 2vw 10vw;
       box-sizing: border-box;
     }
