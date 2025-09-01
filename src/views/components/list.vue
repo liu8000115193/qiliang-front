@@ -1,6 +1,6 @@
 <template>
   <div class="table">
-    <div>存储{{ stat.fileNum }}站，空间使用<span style="color: #2AC840;">{{ parseInt(stat.usedSize / 1024 /
+    <div>空间使用<span style="color: #2AC840;">{{ parseInt(stat.usedSize / 1024 /
         1024 / 1024) }}</span>
         /{{ parseInt(stat.totalSize / 1024 / 1024 / 1024) }}G</div>
     <checkbox-group v-model="checked" shape="square">

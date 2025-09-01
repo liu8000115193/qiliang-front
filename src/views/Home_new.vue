@@ -91,7 +91,7 @@
         <Switch v-model="params.hdrMode" size="3vw"></Switch>
       </div>
       <div class="scan_menu" @click="HandleList">
-        <div>列表</div>
+        <div>扫描列表</div>
       </div>
     </div>
   </Popup>
