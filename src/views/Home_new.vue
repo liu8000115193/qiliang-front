@@ -85,7 +85,9 @@
         <div>去噪</div>
         <Switch v-model="params.driftFilter" size="3vw"></Switch>
       </div>
-
+      <div class="scan_menu" @click="HandleList">
+        <div>列表</div>
+      </div>
     </div>
   </Popup>
 
@@ -108,6 +110,7 @@
   </Popup>
   <SimpleKeyboard v-model:showNumber="showIndexPopup" v-if="showKeyboard" v-model:showKeyboard="showKeyboard"
     :onChange="handleKeyboardInput" />
+  <list v-if="showList" @close="showList = false" @update="GetInfoByInterVal" v-model:showList="showList"></list>
 </template>
 
 <script setup>
@@ -115,6 +118,7 @@ import Head from './components/Head.vue'
 import MoreInfo from './components/MoreInfo.vue';
 import Popup from '@/components/Popup.vue';
 import Code from './components/Code.vue';
+import List from './components/list.vue';
 import { Switch, Field, CountDown, Circle, showNotify, showConfirmDialog, NoticeBar } from 'vant';
 import SimpleKeyboard from "@/components/Keyboard.vue";
 import { scanning, getScanType, getSetting, updateSetting, wakeScreen, stopScan, getEquipment, getNotify,deleteNotify } from '@/service/use';
@@ -437,6 +441,13 @@ onUnmounted(() => {
   clearTimeout(timer)
   clearInterval(timer1)
 })
+
+// 文件列表
+let showList = ref(false)
+function HandleList() {
+  showDenoisePopup.value = false
+  showList.value = true
+}
 </script>
 <style lang="less" scoped>
 .table {
