@@ -128,6 +128,7 @@ export function connectWifi(params:Record<string,any>){
   })
 }
 
+// 设置设备旋转
 export function startRotate(isRotate:boolean){
   return request({
     url: `/rotate`,
@@ -135,5 +136,19 @@ export function startRotate(isRotate:boolean){
     params:{
       isRotate
     }
+  })
+}
+
+export function getScanList(){
+  return request({
+    url: `/scan/list`,
+    method: "GET"
+  })
+}
+
+export function deleteScanItem(ids:string){
+  return request({
+    url: `/scan/${ids}`,
+    method: "DELETE"
   })
 }
