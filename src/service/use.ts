@@ -50,7 +50,7 @@ export function deleteNotify(type:string){
   })
 }
 
-export function updateSetting(params){
+export function updateSetting(params:Record<string,any>){
   return request({
     url: `/setting`,
     method: "PUT",
@@ -120,7 +120,7 @@ export function getWifiList(){
 }
 
 // 连接wifi
-export function connectWifi(params){
+export function connectWifi(params:Record<string,any>){
   return request({
     url: `/wifi/connect`,
     method: "POST",
