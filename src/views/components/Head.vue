@@ -8,8 +8,9 @@
       <Wifi @update="UpdateIp"></Wifi>
       <div class="elec" :style="elecStyle">
         {{ elec }}
+        <img v-if="showElec" src="@/assets/elec.svg" style="width: 3vw;height: 3vw;">
       </div>
-      <img v-if="showElec" src="@/assets/elec.svg" style="width: 6vw;height: 6vw;">
+      
       <img @click="Reload" src="@/assets/refresh.svg" class="logo" style="margin-left: 2vw;width: 6vw;height: 6vw;" alt="刷新" />
     </div>
   </div>
@@ -107,6 +108,8 @@ function UpdateIp(){
     margin: 4vw 2vw;
     position: relative;
     color: #312f2f;
+    display: flex;
+    align-items: center;
 
     &::after {
       content: '';
