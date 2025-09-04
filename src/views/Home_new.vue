@@ -81,12 +81,8 @@
         <div>HDR</div>
         <Switch v-model="params.hdrMode" size="3vw"></Switch>
       </div>
-      <div class="scan_menu">
-        <div>去噪</div>
-        <Switch v-model="params.driftFilter" size="3vw"></Switch>
-      </div>
       <div class="scan_menu" @click="HandleList">
-        <div>列表</div>
+        <div>扫描列表</div>
       </div>
     </div>
   </Popup>
@@ -122,20 +118,22 @@ import List from './components/list.vue';
 import { Switch, Field, CountDown, Circle, showNotify, showConfirmDialog, NoticeBar } from 'vant';
 import SimpleKeyboard from "@/components/Keyboard.vue";
 import { scanning, getScanType, getSetting, updateSetting, wakeScreen, stopScan, getEquipment, getNotify,deleteNotify } from '@/service/use';
+// 关闭彩色，hdr；开启彩色；开启彩色，hdr
+const timeArr = [[65 * 1000, 82 * 1000, 120 * 1000],[77 * 1000, 96 * 1000, 153 * 1000],[132 * 1000, 155 * 1000, 216 * 1000],[100 * 1000, 115 * 1000, 158 * 1000]]
+let isRotate = ref(false)
 
 let params = reactive({
   name: 'Scan',
   index: '',
   scanMode: 0,
   colorSwitch: false,
+  rainFogDenoise: 0,
+  otherDenoise: 0,
+  stitchDenoise: 0,
   inclinometerSwitch:false,
-  hdrMode:false,
-  driftFilter: false,
+  hdrMode:false
 })
-// 关闭彩色，hdr；开启彩色；开启彩色，hdr；开启hdr
-const timeArr = [[75 * 1000, 101 * 1000, 158 * 1000],[101 * 1000, 151 * 1000, 266 * 1000],
-[157 * 1000, 208 * 1000, 325 * 1000],[113 * 1000, 138 * 1000, 193 * 1000]]
-let isRotate = ref(false)
+
 onMounted(() => {
   GetScanResult()
   GetInfoByInterVal()
@@ -211,7 +209,7 @@ function HandleScan() {
   })
 }
 // 扫描进度
-let rate = computed(() => 100 - (time.value / timeArr[(params.colorSwitch ? 1 : 0 )+ params.hdrMode][params.scanMode] * 100))
+let rate = computed(() => 100 - (time.value / chooseTime.value * 100))
 // 处理耗时显示
 let calcTime = ref(0)
 function HandleTime() {
@@ -237,7 +235,6 @@ function GetInfoByInterVal() {
 
 const statusArr = ['待机状态', '采样状态', '错误状态', '自检状态', '电机启动状态', '升级状态', '就绪状态']
 let status = ref('待机状态')
-
 let needTip = ref(false)
 let startTime = ref(0)
 let originParams = {}
@@ -251,7 +248,6 @@ function GetScanResult() {
     originParams = p
   })
   getScanType(params.name + "_" + params.index).then(res => {
-    
     if (res.data.isScanning) {
       if (!showTime.value) {
         startTime.value = res.data.startTime
@@ -352,12 +348,7 @@ function HandleParams(value) {
   console.log('value instanceof Number :>> ',);
   if (typeof value == 'number') {
     params.scanMode = value
-
   } else {
-    if (value == 'hdrMode') {
-      params.colorSwitch = params.hdrMode ? true : params.colorSwitch
-      return
-    }
     if (params[value] == 0) params[value] = 1
     else params[value] = 0
   }
