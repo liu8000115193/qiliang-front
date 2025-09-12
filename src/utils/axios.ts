@@ -28,7 +28,7 @@ service.interceptors.response.use(
     if (response.data == '') {
       return;
     }
-    console.log('response.data :>> ', response.data);
+    // console.log('response.data :>> ', response.data);
     if (response.data.code !== 0) {
       showNotify({
         type: 'danger',

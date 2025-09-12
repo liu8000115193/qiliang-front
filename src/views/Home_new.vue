@@ -84,6 +84,9 @@
       <div class="scan_menu" @click="HandleList">
         <div>扫描列表</div>
       </div>
+      <div class="scan_menu" @click="HandleCalibrate">
+        <div>标定列表</div>
+      </div>
     </div>
   </Popup>
 
@@ -106,10 +109,12 @@
   </Popup>
   <SimpleKeyboard v-model:showNumber="showIndexPopup" v-if="showKeyboard" v-model:showKeyboard="showKeyboard"
     :onChange="handleKeyboardInput" />
-  <list v-if="showList" @close="showList = false" @update="GetInfoByInterVal" v-model:showList="showList"></list>
+  <list v-if="showList" @close="showList = false" v-model:showList="showList"></list>
+  <calibrate v-if="showCalibrate" @close="showCalibrate = false" v-model:showList="showCalibrate"></calibrate>
 </template>
 
 <script setup>
+import calibrate from './components/calibrate.vue';
 import Head from './components/Head.vue'
 import MoreInfo from './components/MoreInfo.vue';
 import Popup from '@/components/Popup.vue';
@@ -439,12 +444,18 @@ function HandleList() {
   showDenoisePopup.value = false
   showList.value = true
 }
+
+let showCalibrate = ref(false)
+function HandleCalibrate(){
+  showDenoisePopup.value = false
+  showCalibrate.value = true
+}
 </script>
 <style lang="less" scoped>
 .table {
   width: 100vw;
   height: 100vh;
-  overflow: hidden;
+  // overflow: hidden;
   font-size: 4vw;
 
   .alpcer {

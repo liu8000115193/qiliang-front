@@ -9,7 +9,7 @@
 </template>
 <script lang="ts" setup>
 const props =defineProps(['title','showPopup'])
-const emits = defineEmits(['update:showPopup'])
+const emits = defineEmits(['update:showPopup','confirm'])
 
 function Close(){
   console.log('close :>> ');
@@ -17,6 +17,7 @@ function Close(){
 }
 
 function Update(){
+  emits('confirm')
   Close()
 }
 </script>

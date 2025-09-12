@@ -64,3 +64,9 @@ h1 {
   --van-checkbox-size: 5vw;
   /* --van-overlay-background:red; */
 }
+
+.viewer-footer,
+/* .viewer-toolbar, */
+.viewer-button {
+  transform: scale(3);
+}
