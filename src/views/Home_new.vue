@@ -124,7 +124,7 @@ import { Switch, Field, CountDown, Circle, showNotify, showConfirmDialog, Notice
 import SimpleKeyboard from "@/components/Keyboard.vue";
 import { scanning, getScanType, getSetting, updateSetting, wakeScreen, stopScan, getEquipment, getNotify,deleteNotify } from '@/service/use';
 // 关闭彩色，hdr；开启彩色；开启彩色，hdr
-const timeArr = [[65 * 1000, 82 * 1000, 120 * 1000],[77 * 1000, 96 * 1000, 153 * 1000],[132 * 1000, 155 * 1000, 216 * 1000],[100 * 1000, 115 * 1000, 158 * 1000]]
+const timeArr = [[75 * 1000, 101 * 1000, 158 * 1000],[101 * 1000, 151 * 1000, 266 * 1000],[157 * 1000, 208 * 1000, 325 * 1000],[113 * 1000, 138 * 1000, 193 * 1000]]
 let isRotate = ref(false)
 
 let params = reactive({
