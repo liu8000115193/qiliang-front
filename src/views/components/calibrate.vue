@@ -72,7 +72,7 @@ function HandleLook(item: Record<string, any>) {
   chooseItem.value = item
   const img = document.createElement('img');
   img.style.display = 'none';
-  img.src = `http://192.168.0.143/result_files/${item.scanName}/calibrate/${item.camera}/${item.resultFileNames}`;
+  img.src = `http://${window.location.host}/result_files/${item.scanName}/calibrate/${item.camera}/${item.resultFileNames}`;
   document.body.appendChild(img);
   const viewer = new Viewer(img, {
     inline: false, // 是否内联显示（默认 false，点击图片弹出全屏预览）

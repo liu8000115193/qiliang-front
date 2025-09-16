@@ -5,7 +5,7 @@
       /{{ parseInt(stat.totalSize / 1024 / 1024 / 1024) }}G</div>
     <checkbox-group v-model="checked" shape="square" style="height: 76vh;overflow-y: auto;">
       <checkbox v-for="item in list" :name="item.id" class="table_item">
-        <div style="display: flex;justify-content: space-between;color: #fff;">
+        <div style="display: flex;justify-content: space-between;color: #fff;width: 85vw;">
           <div>文件名：{{ item.fileName }}</div>
           <!-- <div>文件大小：{{ item.fileSize }}</div> -->
           <div class="table_item__del" @click.stop="HandleDel(item.id)">删除</div>
@@ -22,10 +22,10 @@
     <!--标定设置-->
     <Popup v-model:showPopup="showStandard" title="标定设置" @confirm="AddStandard">
       <div class="scan_menus">
-        <div class="scan_menu" @click="HandleType('left')">
+        <div class="scan_menu" :class="[type == 'left' && 'scan_menu_active']" @click="HandleType('left')">
           <div>左标定</div>
         </div>
-        <div class="scan_menu" @click="HandleType('right')">
+        <div class="scan_menu" :class="[type == 'right' && 'scan_menu_active']" @click="HandleType('right')">
           <div>右标定</div>
         </div>
       </div>
@@ -131,7 +131,6 @@ function AddStandard() {
 
     &__del {
       color: #f56c6c;
-      position: absolute;
       right: 5vw;
     }
   }
