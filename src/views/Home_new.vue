@@ -81,6 +81,10 @@
         <div>HDR</div>
         <Switch v-model="params.hdrMode" size="3vw"></Switch>
       </div>
+      <div class="scan_menu">
+        <div>去噪</div>
+        <Switch v-model="params.driftFilter" size="3vw"></Switch>
+      </div>
       <div class="scan_menu" @click="HandleList">
         <div>扫描列表</div>
       </div>

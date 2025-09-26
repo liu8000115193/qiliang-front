@@ -4,9 +4,10 @@
       <checkbox v-for="(item, index) in list" :name="item.id" class="table_item">
         <div style="color: #fff;">
           <div class="table_item__text">标定文件：{{ item.scanName }}</div>
-          <div class="table_item__text">状态：{{ item.type }}</div>
+          <div class="table_item__text">状态：{{ item.camera == 'left' ? '左标定' : '右标定' }} - {{ item.type }}</div>
           <div style="display: flex;">
             <div class="table_menus__all" @click.stop="HandleLook(item)">查看</div>
+            <div class="table_menus__all" @click.stop="HandleLook(item)">应用</div>
             <div class="table_item__del" @click.stop="HandleDel(item.id)">删除</div>
           </div>
         </div>
