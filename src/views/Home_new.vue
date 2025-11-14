@@ -32,7 +32,7 @@
       </div>
     </div>
     <div class="switch_menus">
-      <div @click="HandleColor" class="mr-3">
+      <div @click="UpdateParams('colorSwitch')" class="mr-3">
         <div class="switch_menu">
           <img class="menu_icon" src="@/assets/color.svg">
           <div class="mt-3">
@@ -61,11 +61,11 @@
   <!--扫描速度设置-->
   <Popup v-model:showPopup="showPopup" title="彩色扫描">
     <div class="scan_menus">
-      <div class="scan_menu" :class="[params.scanMode === 0 ? 'scan_menu_active' : '']" @click="HandleParams(0)">快速
+      <div class="scan_menu" :class="[params.scanMode === 0 ? 'scan_menu_active' : '']" @click="UpdateScanMode(0)">快速
       </div>
-      <div class="scan_menu" :class="[params.scanMode === 1 ? 'scan_menu_active' : '']" @click="HandleParams(1)">标准
+      <div class="scan_menu" :class="[params.scanMode === 1 ? 'scan_menu_active' : '']" @click="UpdateScanMode(1)">标准
       </div>
-      <div class="scan_menu" :class="[params.scanMode === 2 ? 'scan_menu_active' : '']" @click="HandleParams(2)">高密
+      <div class="scan_menu" :class="[params.scanMode === 2 ? 'scan_menu_active' : '']" @click="UpdateScanMode(2)">高密
       </div>
     </div>
   </Popup>
@@ -73,17 +73,17 @@
   <!--去噪设置-->
   <Popup v-model:showPopup="showDenoisePopup" title="更多设置">
     <div class="scan_menus">
-      <div class="scan_menu">
+      <div class="scan_menu" @click="UpdateParams('inclinometerSwitch')">
         <div>倾角仪开关</div>
-        <Switch v-model="params.inclinometerSwitch" size="3vw"></Switch>
+        <Switch :model-value="params.inclinometerSwitch" size="3vw"></Switch>
       </div>
-      <div class="scan_menu">
+      <div class="scan_menu" @click="UpdateParams('hdrMode')">
         <div>HDR</div>
-        <Switch v-model="params.hdrMode" size="3vw"></Switch>
+        <Switch :model-value="params.hdrMode" size="3vw"></Switch>
       </div>
-      <div class="scan_menu">
+      <div class="scan_menu" @click="UpdateParams('driftFilter')">
         <div>去噪</div>
-        <Switch v-model="params.driftFilter" size="3vw"></Switch>
+        <Switch :model-value="params.driftFilter" size="3vw"></Switch>
       </div>
       <div class="scan_menu" @click="HandleList">
         <div>扫描列表</div>
@@ -330,10 +330,10 @@ function HandleKeyboard(key) {
   params[key] = ''
 }
 
-// 设置彩色扫描
-function HandleColor() {
+// 更新参数
+function UpdateParams(key) {
   clearTimeout(timer)
-  params.colorSwitch = !params.colorSwitch
+  params[key] = !params[key]
 }
 
 // 设置扫描速度
@@ -353,7 +353,7 @@ let modeArr = [
   '标准', 
   '高密'
 ]
-function HandleParams(value) {
+function UpdateScanMode(value) {
   console.log('value instanceof Number :>> ',);
   if (typeof value == 'number') {
     params.scanMode = value
