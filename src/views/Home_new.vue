@@ -82,7 +82,6 @@
       <div class="scan_menu" :class="[params.otherDenoise ? 'scan_menu_active' : '']"
         @click="HandleParams('otherDenoise')">其他
       </div>
-      <div class="scan_menu">
       <div class="scan_menu" @click="UpdateParams('inclinometerSwitch')">
         <div>倾角仪开关</div>
         <Switch :model-value="params.inclinometerSwitch" size="3vw"></Switch>
