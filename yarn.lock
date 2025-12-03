@@ -1117,7 +1117,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vue/shared@npm:3.4.25, @vue/shared@npm:^3.4.0, @vue/shared@npm:^3.4.21":
+"@vue/shared@npm:3.4.25, @vue/shared@npm:^3.4.0":
   version: 3.4.25
   resolution: "@vue/shared@npm:3.4.25"
   checksum: 10c0/f9aebaf5a2f129f71473b35c1599108a01fe83a4cda75aef8a26042162e15bb859ea05b7bd79e5d8b83d272db55377b17fc4bcd3c9799f4777e218652fcef2a2
@@ -1128,6 +1128,13 @@ __metadata:
   version: 3.4.27
   resolution: "@vue/shared@npm:3.4.27"
   checksum: 10c0/4a21918858270bcc654bb94b3429d9acbe95af097ea3063e192b36bd502dc896ca47778fa74a863b01f677ec271b189eb90f8b372943c10e52725a6bdc7f6cd5
+  languageName: node
+  linkType: hard
+
+"@vue/shared@npm:^3.5.17":
+  version: 3.5.25
+  resolution: "@vue/shared@npm:3.5.25"
+  checksum: 10c0/8beda92b7c4b70eaffd7ecf30fe366f36f0ed57573696bbd277ad289d367dd23159e2a61a10a67a7d77e525f7a8f994c7f5c6b4736baf184f4b91ab053a7573d
   languageName: node
   linkType: hard
 
@@ -2293,7 +2300,7 @@ __metadata:
     typescript: "npm:^5.4.5"
     unplugin-auto-import: "npm:^0.17.5"
     unplugin-vue-components: "npm:^0.26.0"
-    vant: "npm:^4.8.11"
+    vant: "npm:^4.9.21"
     viewerjs: "npm:^1.11.7"
     vite: "npm:^5.2.0"
     vue: "npm:^3.4.21"
@@ -3371,16 +3378,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vant@npm:^4.8.11":
-  version: 4.8.11
-  resolution: "vant@npm:4.8.11"
+"vant@npm:^4.9.21":
+  version: 4.9.21
+  resolution: "vant@npm:4.9.21"
   dependencies:
     "@vant/popperjs": "npm:^1.3.0"
     "@vant/use": "npm:^1.6.0"
-    "@vue/shared": "npm:^3.4.21"
+    "@vue/shared": "npm:^3.5.17"
   peerDependencies:
     vue: ^3.0.0
-  checksum: 10c0/1369fbd622cd485968eaa3f2cfd3a260b6600802285c94fce40db87d92a2dd2338e2bcd1b3c390007ea6a7e432eaffd32be7b501b76d5c67fb6be91adffecc63
+  checksum: 10c0/96986f01d9d5e4c9b9c150ef74a5dd1bd9cde0dc993d2969f5c2b3f42860d6861b01f9e15415fa6e685be6c0409534a3cea135ebf1bc018f55d13ab8c28c0489
   languageName: node
   linkType: hard
 

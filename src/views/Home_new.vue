@@ -2,10 +2,11 @@
   <main class="table">
     <div style="position: fixed;top: 5vh;left: 0;width: 100vw;box-sizing: border-box;text-align: left;z-index: 999;">
       <NoticeBar v-if="warningInfo.length > 0" mode="closeable" style="margin-bottom: 20px;" left-icon="warning-o"
-         wrapable :text="warningInfo.join('\n')" @close="CloseNotify('warning')" />
-      <NoticeBar v-if="primaryInfo.length > 0" mode="closeable" color="#1989fa" background="#ecf9ff" left-icon="info-o" 
-         wrapable :text="primaryInfo.join('\n')" @close="CloseNotify('info')" />
+        wrapable :text="warningInfo.join('\n')" @close="CloseNotify('warning')" />
+      <NoticeBar v-if="primaryInfo.length > 0" mode="closeable" color="#1989fa" background="#ecf9ff" left-icon="info-o"
+        wrapable :text="primaryInfo.join('\n')" @close="CloseNotify('info')" />
     </div>
+
     <Head @update="GetEquipment"></Head>
 
     <div v-if="!showInfo">
@@ -91,7 +92,20 @@
       <div class="scan_menu" @click="HandleCalibrate">
         <div>标定列表</div>
       </div>
+      <div class="scan_menu" @click="HandleKeyboard('driftFilterRange')">
+        <div>去噪范围</div>
+        <div>{{ params.driftFilterRange }}</div>
+      </div>
+      <div class="scan_menu" @click="HandleKeyboard('driftFilterValue')">
+        <div>去噪值</div>
+        <div>{{ params.driftFilterValue }}</div>
+        <!-- <Stepper type="number" min="1" max="10" inputmode="numeric" disable-input step="0.1" :decimal-length="1"
+          style="font-size: 5vw;background: #000;color: #fff;opacity: 1; width: max-content;"
+          v-model="params.driftFilterValue">
+        </Stepper> -->
+      </div>
     </div>
+
   </Popup>
 
   <!--项目名-->
@@ -111,7 +125,9 @@
         v-model="params.index" readonly></Field>
     </div>
   </Popup>
-  <SimpleKeyboard v-model:showNumber="showIndexPopup" v-if="showKeyboard" v-model:showKeyboard="showKeyboard"
+  <!-- <NumberKeyboard v-model="params[paramKey]" :show="showNumberKeyboard" close-button-text="完成"
+    @blur="handleCloseNumKeyboard" theme="custom" z-index="1100" style="color: #000;" /> -->
+  <SimpleKeyboard :showNumber="paramKey != 'name'" v-if="showKeyboard" v-model:showKeyboard="showKeyboard"
     :onChange="handleKeyboardInput" />
   <list v-if="showList" @close="showList = false" v-model:showList="showList"></list>
   <calibrate v-if="showCalibrate" @close="showCalibrate = false" v-model:showList="showCalibrate"></calibrate>
@@ -124,11 +140,11 @@ import MoreInfo from './components/MoreInfo.vue';
 import Popup from '@/components/Popup.vue';
 import Code from './components/Code.vue';
 import List from './components/list.vue';
-import { Switch, Field, CountDown, Circle, showNotify, showConfirmDialog, NoticeBar } from 'vant';
+import { Switch, Field, CountDown, Circle, showNotify, showConfirmDialog, NoticeBar, Stepper } from 'vant';
 import SimpleKeyboard from "@/components/Keyboard.vue";
-import { scanning, getScanType, getSetting, updateSetting, wakeScreen, stopScan, getEquipment, getNotify,deleteNotify } from '@/service/use';
+import { scanning, getScanType, getSetting, updateSetting, wakeScreen, stopScan, getEquipment, getNotify, deleteNotify } from '@/service/use';
 // 关闭彩色，hdr；开启彩色；开启彩色，hdr
-const timeArr = [[75 * 1000, 101 * 1000, 158 * 1000],[101 * 1000, 151 * 1000, 266 * 1000],[157 * 1000, 208 * 1000, 325 * 1000],[113 * 1000, 138 * 1000, 193 * 1000]]
+const timeArr = [[75 * 1000, 101 * 1000, 158 * 1000], [101 * 1000, 151 * 1000, 266 * 1000], [157 * 1000, 208 * 1000, 325 * 1000], [113 * 1000, 138 * 1000, 193 * 1000]]
 let isRotate = ref(false)
 
 let params = reactive({
@@ -139,8 +155,11 @@ let params = reactive({
   rainFogDenoise: 0,
   otherDenoise: 0,
   stitchDenoise: 0,
-  inclinometerSwitch:false,
-  hdrMode:false
+  inclinometerSwitch: false,
+  hdrMode: false,
+  driftFilter: false,
+  driftFilterRange: 0,
+  driftFilterValue: 0
 })
 
 onMounted(() => {
@@ -158,7 +177,7 @@ function GetEquipment() {
 
 // 显示更多信息
 let showInfo = ref(false)
-// 去噪设置
+// 去更多设置显示值
 let denoiseVal = computed(() => {
   let arr = []
   if (params.inclinometerSwitch) {
@@ -198,6 +217,14 @@ function HandleScan() {
     showNotify({
       type: 'warning',
       message: '请先退出展示模式',
+      duration: 1500,
+    })
+    return
+  }
+  if (!equipment.value.ptpStatus.startWiths('Locked')) {
+    showNotify({
+      type: 'warning',
+      message: '时钟校准中，请稍等片刻再扫描',
       duration: 1500,
     })
     return
@@ -320,7 +347,24 @@ function HandleIndex() {
 let showKeyboard = ref(false)
 let paramKey = ref('name')
 let handleKeyboardInput = (input) => {
-  params[paramKey.value] = input
+  if (paramKey.value == 'driftFilterRange' || paramKey.value == 'driftFilterValue') {
+    let num = parseInt(input)
+    if (isNaN(num)) {
+      num = ''
+    } else {
+      if (num < 1 || num > 10) {
+        showNotify({
+          type: 'warning',
+          message: '取值范围1-10',
+          className: 'status'
+        })
+      }
+    }
+    params[paramKey.value] = num
+
+  } else {
+    params[paramKey.value] = input
+  }
 }
 // 显示键盘并清除定时器
 function HandleKeyboard(key) {
@@ -342,15 +386,15 @@ let title = ref('彩色扫描')
 function HandleScanMode() {
   showPopup.value = true
 }
-// 去噪设置
+// 更多设置弹窗
 let showDenoisePopup = ref(false)
 function HandleDenoise() {
   showDenoisePopup.value = true
 }
 
 let modeArr = [
-  '快速', 
-  '标准', 
+  '快速',
+  '标准',
   '高密'
 ]
 function UpdateScanMode(value) {
@@ -381,6 +425,7 @@ watch(params, (newValue, oldValue) => {
   if (!showKeyboard.value && newValue.name != '' && newValue.index != '' && !isNaN(Number(newValue.index, 10))) {
     Object.keys(newValue).forEach(x => {
       if (newValue[x] !== originParams[x]) {
+        console.log('更新params :>> ');
         clearTimeout(timer)
         updateSetting(newValue).then(res => {
           GetInfoByInterVal()
@@ -392,15 +437,24 @@ watch(params, (newValue, oldValue) => {
 })
 
 // 监听键盘变化，弹出时停止定时请求，收起后重新轮询
-watch(showKeyboard, (newValue, oldValue) => {
+watch(showKeyboard, async (newValue, oldValue) => {
   if (!newValue) {
-    showIndexPopup.value = false
-    showNamePopup.value = false
-    if (params.name != '' && params.index != '' && !isNaN(Number(params.index, 10))) {
-      updateSetting(params)
+    try {
+      if (paramKey.value == 'name' || paramKey.value == 'index') {
+        showIndexPopup.value = false
+        showNamePopup.value = false
+        if (params.name != '' && params.index != '' && !isNaN(Number(params.index, 10))) {
+          await updateSetting(params)
+        }
+      } else if (paramKey.value == 'driftFilterRange' || paramKey.value == 'driftFilterValue') {
+        if (params.driftFilterRange != '' && params.driftFilterValue != '') {
+          await updateSetting(params)
+        }
+      }
+      GetInfoByInterVal()
+    } catch (error) {
+      GetInfoByInterVal()
     }
-    clearTimeout(timer)
-    GetInfoByInterVal()
   }
 })
 
@@ -417,7 +471,7 @@ watch(showNamePopup, (newValue, oldValue) => {
 })
 
 
-
+// 通知
 let warningInfo = ref([])
 let primaryInfo = ref([])
 function GetNotify() {
@@ -450,16 +504,34 @@ function HandleList() {
 }
 
 let showCalibrate = ref(false)
-function HandleCalibrate(){
+function HandleCalibrate() {
   showDenoisePopup.value = false
   showCalibrate.value = true
+}
+
+// 去噪参数设置
+let showDirftPopup = ref(false)
+function HandleDirftPopup() {
+  showDenoisePopup.value = false
+  showDirftPopup.value = true
+}
+function HandleDirft(value) {
+  let num = parseInt(value)
+  if (isNaN(num)) {
+    return ''
+  }
+  if (num < 1) {
+    num = 1
+  } else if (num > 10) {
+    num = 10
+  }
+  return num.toString()
 }
 </script>
 <style lang="less" scoped>
 .table {
   width: 100vw;
   height: 100vh;
-  // overflow: hidden;
   font-size: 4vw;
 
   .alpcer {

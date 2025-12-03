@@ -3,15 +3,16 @@
     <div>空间使用<span style="color: #2AC840;">{{ parseInt(stat.usedSize / 1024 /
       1024 / 1024) }}</span>
       /{{ parseInt(stat.totalSize / 1024 / 1024 / 1024) }}G</div>
-    <checkbox-group v-model="checked" shape="square" style="height: 76vh;overflow-y: auto;">
-      <checkbox v-for="item in list" :name="item.id" class="table_item">
-        <div style="display: flex;justify-content: space-between;color: #fff;width: 85vw;">
-          <div>文件名：{{ item.fileName }}</div>
-          <!-- <div>文件大小：{{ item.fileSize }}</div> -->
+    <div class="wrap" ref="listRef">
+      <checkbox-group v-model="checked" shape="square">
+        <div v-for="item in list" :key="item.id" class="table_item">
+          <checkbox :name="item.id">
+            <div style="color: #fff;">文件名：{{ item.fileName }}</div>
+          </checkbox>
           <div class="table_item__del" @click.stop="HandleDel(item.id)">删除</div>
         </div>
-      </checkbox>
-    </checkbox-group>
+      </checkbox-group>
+    </div>
     <div class="table_menus">
       <div class="table_menus__all" @click="HandleCheck">全选</div>
       <div class="table_menus__all" @click="showStandard = true">标定</div>
@@ -37,11 +38,28 @@
 
 <script setup lang="ts">
 import { Checkbox, CheckboxGroup, showNotify } from 'vant';
-import { getScanList, deleteScanItem, getStat,addCalibrate } from '@/service/use'
+import { getScanList, deleteScanItem, getStat, addCalibrate } from '@/service/use'
 
+let listRef = ref<HTMLElement | null>(null)
+let mousedown = ref(false)
+let startY = ref(0)
 onMounted(() => {
   GetList()
   GetInfo()
+  listRef.value?.addEventListener('mousedown', (e: any) => {
+    mousedown.value = true
+    startY.value = e.clientY
+  })
+  listRef.value?.addEventListener('mousemove', (e: any) => {
+    if (mousedown.value) {
+      e.preventDefault()
+      let moveY = (e.clientY - startY.value) / 20
+      listRef.value!.scrollTop -= moveY
+    }
+  })
+  listRef.value?.addEventListener('mouseup', (e: any) => {
+    mousedown.value = false
+  })
 })
 let list = ref([])
 function GetList() {
@@ -70,6 +88,7 @@ function HandleDel(id = null) {
   deleteScanItem(ids).then(() => {
     GetList()
     checked.value = []
+    GetInfo()
   })
   // 删除接口
 }
@@ -120,6 +139,8 @@ function AddStandard() {
   background-color: #000;
   padding-bottom: 10vh;
   box-sizing: border-box;
+  overflow: hidden;
+  z-index: 1000;
 
   &_item {
     padding: 2vw;
@@ -127,11 +148,12 @@ function AddStandard() {
     color: #fff;
     font-size: 5vw;
     display: flex;
-    width: auto;
+    justify-content: space-between;
+    // width: auto;
 
     &__del {
       color: #f56c6c;
-      right: 5vw;
+      // right: 5vw;
     }
   }
 
@@ -180,5 +202,24 @@ function AddStandard() {
       border: 1px solid #fff;
     }
   }
+}
+
+.wrap {
+  height: 76vh;
+  overflow-y: auto;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 2vw;
+  height: 10vh;
+}
+
+::-webkit-scrollbar {
+  width: 4vw;
+  /* 垂直滚动条宽度 */
+  width: 4vw;
+  /* 水平滚动条高度 */
+  // background-color: #fff;
 }
 </style>

@@ -62,6 +62,7 @@ h1 {
   --van-notice-bar-line-height:24px;
   --van-notice-bar-icon-size:6vw;
   --van-checkbox-size: 5vw;
+  --van-number-keyboard-key-active-color: #333;
   /* --van-overlay-background:red; */
 }
 
