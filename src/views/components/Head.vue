@@ -2,7 +2,7 @@
   <div class="navbar">
     <div class="row">
       <img @click="Close" src="@/assets/shutdown.svg" class="shutdown_logo" alt="关机" />
-      {{ today }}
+      <div @click="showPopup = true">{{ today }}</div>
     </div>
     <div class="row">
       <Wifi @update="UpdateIp"></Wifi>
@@ -10,18 +10,27 @@
         {{ elec }}
         <img v-if="showElec" src="@/assets/elec.svg" style="width: 3vw;height: 3vw;">
       </div>
-      
-      <img @click="Reload" src="@/assets/refresh.svg" class="logo" style="margin-left: 2vw;width: 6vw;height: 6vw;" alt="刷新" />
+
+      <img @click="Reload" src="@/assets/refresh.svg" class="logo" style="margin-left: 2vw;width: 6vw;height: 6vw;"
+        alt="刷新" />
     </div>
   </div>
+  <!-- 圆角弹窗（底部） -->
+  <Popup v-model:show="showPopup" round position="bottom" :style="{ height: '50vh' }">
+    <!-- <input type="datetime-local" name="datetime-local"/> -->
+    <DatePicker v-if="type == 'date'" option-height="10vw" v-model="date" type="date" title="选择日期" @confirm="handleTime('date')" @cancel="ClosePopup" />
+    <TimePicker v-else v-model="time" option-height="10vw" title="选择时间" @confirm="handleTime('time')" @cancel="ClosePopup" />
+  </Popup>
 </template>
 
 <script setup lang="ts">
-import { showConfirmDialog } from 'vant';
+import { showConfirmDialog, DatePicker, Popup,TimePicker } from 'vant';
 import { getElectricity, closeEquipment } from '@/service/use';
 import { useDateFormat, useNow } from '@vueuse/core'
 import Wifi from '@/components/Wifi.vue';
-const today = useDateFormat(useNow(), 'MM-DD HH:mm (ddd)', { locales: 'zh-CN' })
+import '@vant/touch-emulator';
+
+let today = useDateFormat(useNow(), 'MM-DD HH:mm (ddd)', { locales: 'zh-CN' })
 
 const emits = defineEmits('update')
 onMounted(() => {
@@ -69,8 +78,28 @@ function Reload() {
   location.reload()
 }
 
-function UpdateIp(){
+function UpdateIp() {
   emits('update')
+}
+
+// 更新时间弹窗
+let showPopup = ref(false)
+let date = ref([new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate()])
+let time = ref([new Date().getHours(), new Date().getMinutes()])
+let type = ref<'date' | 'time'>('date')
+function handleTime(val:string) {
+  if (val === 'date') {
+    type.value = 'time'
+    today = useDateFormat(`${date.value.join('-')} ${time.value.join(':')}`, 'MM-DD HH:mm (ddd)', { locales: 'zh-CN' })
+  } else {
+    type.value = 'date'
+    ClosePopup()
+  }
+  
+}
+
+function ClosePopup() {
+  showPopup.value = false
 }
 </script>
 

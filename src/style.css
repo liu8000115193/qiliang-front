@@ -62,5 +62,9 @@ h1 {
   --van-notice-bar-line-height:24px;
   --van-notice-bar-icon-size:6vw;
   --van-checkbox-size: 5vw;
-  /* --van-overlay-background:red; */
+  /* --van-picker-action-font-size:4vw;
+  --van-picker-title-font-size:5vw;
+  --van-picker-tootlbar-height:8vw;
+  --van-picker-option-font-size:4vw;
+  --van-picker-title-line-height:8vw; */
 }
