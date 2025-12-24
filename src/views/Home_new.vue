@@ -221,7 +221,8 @@ function HandleScan() {
     })
     return
   }
-  if (!equipment.value.ptpStatus.startWiths('Locked')) {
+  console.log('equipment :>> ', equipment.value);
+  if (!equipment.value.ptpStatus.startsWith('Locked')) {
     showNotify({
       type: 'warning',
       message: '时钟校准中，请稍等片刻再扫描',
@@ -360,7 +361,7 @@ let handleKeyboardInput = (input) => {
         })
       }
     }
-    params[paramKey.value] = num
+    params[paramKey.value] = input
 
   } else {
     params[paramKey.value] = input
