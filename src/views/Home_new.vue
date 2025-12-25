@@ -99,10 +99,9 @@
       <div class="scan_menu" @click="HandleKeyboard('driftFilterValue')">
         <div>去噪值</div>
         <div>{{ params.driftFilterValue }}</div>
-        <!-- <Stepper type="number" min="1" max="10" inputmode="numeric" disable-input step="0.1" :decimal-length="1"
-          style="font-size: 5vw;background: #000;color: #fff;opacity: 1; width: max-content;"
-          v-model="params.driftFilterValue">
-        </Stepper> -->
+      </div>
+      <div class="scan_menu" @click="HandleVersion">
+        <div>更新版本</div>
       </div>
     </div>
 
@@ -142,7 +141,7 @@ import Code from './components/Code.vue';
 import List from './components/list.vue';
 import { Switch, Field, CountDown, Circle, showNotify, showConfirmDialog, NoticeBar, Stepper } from 'vant';
 import SimpleKeyboard from "@/components/Keyboard.vue";
-import { scanning, getScanType, getSetting, updateSetting, wakeScreen, stopScan, getEquipment, getNotify, deleteNotify } from '@/service/use';
+import { scanning, getScanType, getSetting, updateSetting, wakeScreen, stopScan, getEquipment, getNotify, deleteNotify,updateVersion } from '@/service/use';
 // 关闭彩色，hdr；开启彩色；开启彩色，hdr
 const timeArr = [[75 * 1000, 101 * 1000, 158 * 1000], [101 * 1000, 151 * 1000, 266 * 1000], [157 * 1000, 208 * 1000, 325 * 1000], [113 * 1000, 138 * 1000, 193 * 1000]]
 let isRotate = ref(false)
@@ -527,6 +526,28 @@ function HandleDirft(value) {
     num = 10
   }
   return num.toString()
+}
+
+let isUpdate = ref(false)
+function HandleVersion() {
+  if (isUpdate.value) {
+    showNotify({
+      type: 'warning',
+      message: '正在更新中，请勿重复操作',
+      duration: 2000,
+    })
+    return
+  } else {
+    isUpdate.value = true
+    updateVersion().then(res => {
+      showNotify({
+        type: 'success',
+        message: res.msg,
+        duration: 3000,
+      })
+      isUpdate.value = false
+    })
+  }
 }
 </script>
 <style lang="less" scoped>

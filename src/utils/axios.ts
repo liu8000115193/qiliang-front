@@ -14,6 +14,9 @@ const service: AxiosInstance = axios.create({
 // 请求拦截器
 service.interceptors.request.use(
   config => {
+    if (config.base === "update") {
+      config.baseURL = `http://${location.host}:9994`;
+    }
     return config;
   },
   error => {

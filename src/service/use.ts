@@ -178,3 +178,12 @@ export function deleteCalibrations(ids:string){
     method: "DELETE"
   })
 }
+
+export function updateVersion(){
+  return request({
+    url: `/update`,
+    method: "POST",
+    base:'update'
+  })
+}
+
