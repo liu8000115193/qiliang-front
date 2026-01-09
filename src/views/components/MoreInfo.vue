@@ -30,6 +30,11 @@ function GetInfo() {
   getStat().then(res => {
     if (res.data) {
       stat.value = res.data
+      if (!res.data.ptpStatus.startsWith('Locked')) {
+        setTimeout(() => {
+          GetInfo()
+        }, 10000)
+      }
     }
   })
 }
