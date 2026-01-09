@@ -93,6 +93,9 @@
       <div class="scan_menu" @click="HandleList">
         <div>扫描列表</div>
       </div>
+      <div class="scan_menu" @click="HandleVersion">
+        <div>更新版本</div>
+      </div>
     </div>
   </Popup>
 
@@ -126,7 +129,7 @@ import Code from './components/Code.vue';
 import List from './components/list.vue';
 import { Switch, Field, CountDown, Circle, showNotify, showConfirmDialog, NoticeBar } from 'vant';
 import SimpleKeyboard from "@/components/Keyboard.vue";
-import { scanning, getScanType, getSetting, updateSetting, wakeScreen, stopScan, getEquipment, getNotify,deleteNotify } from '@/service/use';
+import { scanning, getScanType, getSetting, updateSetting, wakeScreen, stopScan, getEquipment, getNotify,deleteNotify,updateVersion } from '@/service/use';
 // 关闭彩色，hdr；开启彩色；开启彩色，hdr
 const timeArr = [[65 * 1000, 82 * 1000, 120 * 1000],[77 * 1000, 96 * 1000, 153 * 1000],[132 * 1000, 155 * 1000, 216 * 1000],[100 * 1000, 115 * 1000, 158 * 1000]]
 let isRotate = ref(false)
@@ -443,6 +446,28 @@ let showList = ref(false)
 function HandleList() {
   showDenoisePopup.value = false
   showList.value = true
+}
+
+let isUpdate = ref(false)
+function HandleVersion() {
+  if (isUpdate.value) {
+    showNotify({
+      type: 'warning',
+      message: '正在更新中，请勿重复操作',
+      duration: 2000,
+    })
+    return
+  } else {
+    isUpdate.value = true
+    updateVersion().then(res => {
+      showNotify({
+        type: 'success',
+        message: res.msg,
+        duration: 3000,
+      })
+      isUpdate.value = false
+    })
+  }
 }
 </script>
 <style lang="less" scoped>
