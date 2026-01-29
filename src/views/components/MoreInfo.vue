@@ -58,14 +58,15 @@ function HandleRotate(e: PointerEvent) {
   showConfirmDialog({
     title: '提示',
     message:
-      `是否${props.isRotate ? '退出' : '进入'}展示模式？`,
+      `是否${props.isRotate ? '退出' : '进入'}续航测试模式？`,
   })
     .then(() => {
-      startRotate(props.isRotate).then(res =>{
-        if (res.code == 0) {
-          emits('update:isRotate', !props.isRotate)
-        }
+      
+      startRotate(!props.isRotate).then(res =>{
+
       })
+      emits('update:isRotate', !props.isRotate)
+      // 
     })
 }
 

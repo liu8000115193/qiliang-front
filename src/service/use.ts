@@ -129,12 +129,12 @@ export function connectWifi(params:Record<string,any>){
 }
 
 // 设置设备旋转
-export function startRotate(isRotate:boolean){
+export function startRotate(test:boolean){
   return request({
-    url: `/rotate`,
-    method: "GET",
+    url: `/scan/test`,
+    method: "POST",
     params:{
-      isRotate
+      test
     }
   })
 }
