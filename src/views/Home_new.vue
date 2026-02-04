@@ -546,6 +546,13 @@ function HandleVersion() {
         duration: 3000,
       })
       isUpdate.value = false
+    }).catch(err => {
+      showNotify({
+        type: 'danger',
+        message: err.msg,
+        duration: 3000,
+      })
+      isUpdate.value = false
     })
   }
 }
