@@ -160,3 +160,11 @@ export function updateVersion(){
     base:'update'
   })
 }
+
+export function getProgress(){
+  return request({
+    url: `/progress`,
+    method: "GET",
+    base:'update'
+  })
+}

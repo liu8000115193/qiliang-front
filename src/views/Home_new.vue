@@ -61,11 +61,11 @@
   <!--扫描速度设置-->
   <Popup v-model:showPopup="showPopup" title="彩色扫描">
     <div class="scan_menus">
-      <div class="scan_menu" :class="[params.scanMode === 0 ? 'scan_menu_active' : '']" @click="UpdateScanMode(0)">快速
+      <div class="scan_menu" :class="[params.scanMode === 0 ? 'scan_menu_active' : '']" @click="HandleParams(0)">快速
       </div>
-      <div class="scan_menu" :class="[params.scanMode === 1 ? 'scan_menu_active' : '']" @click="UpdateScanMode(1)">标准
+      <div class="scan_menu" :class="[params.scanMode === 1 ? 'scan_menu_active' : '']" @click="HandleParams(1)">标准
       </div>
-      <div class="scan_menu" :class="[params.scanMode === 2 ? 'scan_menu_active' : '']" @click="UpdateScanMode(2)">高密
+      <div class="scan_menu" :class="[params.scanMode === 2 ? 'scan_menu_active' : '']" @click="HandleParams(2)">高密
       </div>
     </div>
   </Popup>
@@ -116,6 +116,9 @@
         v-model="params.index" readonly></Field>
     </div>
   </Popup>
+  <Popup v-model:showPopup="isUpdate" title="更新进度">
+    <Progress :percentage="progress"></Progress>
+  </Popup>
   <SimpleKeyboard v-model:showNumber="showIndexPopup" v-if="showKeyboard" v-model:showKeyboard="showKeyboard"
     :onChange="handleKeyboardInput" />
   <list v-if="showList" @close="showList = false" @update="GetInfoByInterVal" v-model:showList="showList"></list>
@@ -127,9 +130,9 @@ import MoreInfo from './components/MoreInfo.vue';
 import Popup from '@/components/Popup.vue';
 import Code from './components/Code.vue';
 import List from './components/list.vue';
-import { Switch, Field, CountDown, Circle, showNotify, showConfirmDialog, NoticeBar } from 'vant';
+import { Switch, Field, CountDown, Circle, showNotify, showConfirmDialog, NoticeBar,Progress } from 'vant';
 import SimpleKeyboard from "@/components/Keyboard.vue";
-import { scanning, getScanType, getSetting, updateSetting, wakeScreen, stopScan, getEquipment, getNotify,deleteNotify,updateVersion } from '@/service/use';
+import { scanning, getScanType, getSetting, updateSetting, wakeScreen, stopScan, getEquipment, getNotify,deleteNotify,updateVersion, getProgress } from '@/service/use';
 // 关闭彩色，hdr；开启彩色；开启彩色，hdr
 const timeArr = [[65 * 1000, 82 * 1000, 120 * 1000],[77 * 1000, 96 * 1000, 153 * 1000],[132 * 1000, 155 * 1000, 216 * 1000],[100 * 1000, 115 * 1000, 158 * 1000]]
 let isRotate = ref(false)
@@ -449,7 +452,9 @@ function HandleList() {
 }
 
 let isUpdate = ref(false)
+let progress = ref(0)
 function HandleVersion() {
+  showDenoisePopup.value = false
   if (isUpdate.value) {
     showNotify({
       type: 'warning',
@@ -459,6 +464,7 @@ function HandleVersion() {
     return
   } else {
     isUpdate.value = true
+    GetProgress()
     updateVersion().then(res => {
       showNotify({
         type: 'success',
@@ -468,6 +474,16 @@ function HandleVersion() {
       isUpdate.value = false
     })
   }
+}
+function GetProgress() { 
+  getProgress().then(res => {
+    progress.value = res.data
+    if (res.data < 100 && isUpdate.value) {
+      setTimeout(() => {
+        GetProgress()
+      }, 1000);
+    }
+  })
 }
 </script>
 <style lang="less" scoped>
