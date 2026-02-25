@@ -482,6 +482,15 @@ function GetProgress() {
       setTimeout(() => {
         GetProgress()
       }, 1000);
+    } else {
+      showConfirmDialog({
+          title: '提示',
+          message:
+            `更新成功`,
+        })
+          .then(() => {
+            location.reload()
+          })
     }
   })
 }
