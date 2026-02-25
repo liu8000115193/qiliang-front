@@ -187,3 +187,10 @@ export function updateVersion(){
   })
 }
 
+export function getProgress(){
+  return request({
+    url: `/progress`,
+    method: "GET",
+    base:'update'
+  })
+}

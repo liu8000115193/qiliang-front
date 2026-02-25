@@ -124,6 +124,9 @@
         v-model="params.index" readonly></Field>
     </div>
   </Popup>
+  <Popup v-model:showPopup="isUpdate" title="更新进度">
+    <Progress :percentage="progress"></Progress>
+  </Popup>
   <!-- <NumberKeyboard v-model="params[paramKey]" :show="showNumberKeyboard" close-button-text="完成"
     @blur="handleCloseNumKeyboard" theme="custom" z-index="1100" style="color: #000;" /> -->
   <SimpleKeyboard :showNumber="paramKey != 'name'" v-if="showKeyboard" v-model:showKeyboard="showKeyboard"
@@ -141,7 +144,7 @@ import Code from './components/Code.vue';
 import List from './components/list.vue';
 import { Switch, Field, CountDown, Circle, showNotify, showConfirmDialog, NoticeBar, Stepper } from 'vant';
 import SimpleKeyboard from "@/components/Keyboard.vue";
-import { scanning, getScanType, getSetting, updateSetting, wakeScreen, stopScan, getEquipment, getNotify, deleteNotify,updateVersion } from '@/service/use';
+import { scanning, getScanType, getSetting, updateSetting, wakeScreen, stopScan, getEquipment, getNotify, deleteNotify,updateVersion, getProgress } from '@/service/use';
 // 关闭彩色，hdr；开启彩色；开启彩色，hdr
 const timeArr = [[75 * 1000, 101 * 1000, 158 * 1000], [101 * 1000, 151 * 1000, 266 * 1000], [157 * 1000, 208 * 1000, 325 * 1000], [113 * 1000, 138 * 1000, 193 * 1000]]
 let isRotate = ref(false)
@@ -529,6 +532,7 @@ function HandleDirft(value) {
 }
 
 let isUpdate = ref(false)
+let progress = ref(0)
 function HandleVersion() {
   if (isUpdate.value) {
     showNotify({
@@ -555,6 +559,19 @@ function HandleVersion() {
       isUpdate.value = false
     })
   }
+}
+
+function GetProgress() { 
+  getProgress().then(res => {
+    progress.value = res.data
+    if (res.data < 100 && isUpdate.value) {
+      setTimeout(() => {
+        GetProgress()
+      }, 1000);
+    } else {
+      location.reload()
+    }
+  })
 }
 </script>
 <style lang="less" scoped>
