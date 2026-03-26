@@ -454,7 +454,9 @@ watch(showKeyboard, async (newValue, oldValue) => {
           await updateSetting(params)
         }
       }
-      GetInfoByInterVal()
+      setTimeout(() => {
+        GetInfoByInterVal()
+      }, 2000);
     } catch (error) {
       GetInfoByInterVal()
     }
@@ -569,7 +571,14 @@ function GetProgress() {
         GetProgress()
       }, 1000);
     } else {
-      location.reload()
+      showConfirmDialog({
+          title: '提示',
+          message:
+            `更新成功`,
+        })
+          .then(() => {
+            location.reload()
+          })
     }
   })
 }
