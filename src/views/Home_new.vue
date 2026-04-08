@@ -2,10 +2,11 @@
   <main class="table">
     <div style="position: fixed;top: 5vh;left: 0;width: 100vw;box-sizing: border-box;text-align: left;z-index: 999;">
       <NoticeBar v-if="warningInfo.length > 0" mode="closeable" style="margin-bottom: 20px;" left-icon="warning-o"
-         wrapable :text="warningInfo.join('\n')" @close="CloseNotify('warning')" />
-      <NoticeBar v-if="primaryInfo.length > 0" mode="closeable" color="#1989fa" background="#ecf9ff" left-icon="info-o" 
-         wrapable :text="primaryInfo.join('\n')" @close="CloseNotify('info')" />
+        wrapable :text="warningInfo.join('\n')" @close="CloseNotify('warning')" />
+      <NoticeBar v-if="primaryInfo.length > 0" mode="closeable" color="#1989fa" background="#ecf9ff" left-icon="info-o"
+        wrapable :text="primaryInfo.join('\n')" @close="CloseNotify('info')" />
     </div>
+
     <Head @update="GetEquipment"></Head>
 
     <div v-if="!showInfo">
@@ -96,6 +97,9 @@
       <div class="scan_menu" @click="HandleVersion">
         <div>更新版本</div>
       </div>
+      <div class="scan_menu" @click="handleLog">
+        <div>上传日志</div>
+      </div>
     </div>
   </Popup>
 
@@ -130,11 +134,14 @@ import MoreInfo from './components/MoreInfo.vue';
 import Popup from '@/components/Popup.vue';
 import Code from './components/Code.vue';
 import List from './components/list.vue';
-import { Switch, Field, CountDown, Circle, showNotify, showConfirmDialog, NoticeBar,Progress } from 'vant';
+import { Switch, Field, CountDown, Circle, showNotify, showConfirmDialog, NoticeBar, Progress } from 'vant';
 import SimpleKeyboard from "@/components/Keyboard.vue";
-import { scanning, getScanType, getSetting, updateSetting, wakeScreen, stopScan, getEquipment, getNotify,deleteNotify,updateVersion, getProgress } from '@/service/use';
+import {
+  scanning, getScanType, getSetting, updateSetting, wakeScreen, stopScan, getEquipment, getNotify,
+  deleteNotify, updateVersion, getProgress, updateCheck, uploadLog
+} from '@/service/use';
 // 关闭彩色，hdr；开启彩色；开启彩色，hdr
-const timeArr = [[65 * 1000, 82 * 1000, 120 * 1000],[77 * 1000, 96 * 1000, 153 * 1000],[132 * 1000, 155 * 1000, 216 * 1000],[100 * 1000, 115 * 1000, 158 * 1000]]
+const timeArr = [[65 * 1000, 82 * 1000, 120 * 1000], [77 * 1000, 96 * 1000, 153 * 1000], [132 * 1000, 155 * 1000, 216 * 1000], [100 * 1000, 115 * 1000, 158 * 1000]]
 let isRotate = ref(false)
 
 let params = reactive({
@@ -145,8 +152,8 @@ let params = reactive({
   rainFogDenoise: 0,
   otherDenoise: 0,
   stitchDenoise: 0,
-  inclinometerSwitch:false,
-  hdrMode:false
+  inclinometerSwitch: false,
+  hdrMode: false
 })
 
 onMounted(() => {
@@ -399,10 +406,14 @@ watch(showKeyboard, (newValue, oldValue) => {
     showIndexPopup.value = false
     showNamePopup.value = false
     if (params.name != '' && params.index != '' && !isNaN(Number(params.index, 10))) {
-      updateSetting(params)
+      updateSetting(params).then(res => {
+        GetInfoByInterVal()
+      })
+    } else {
+      GetInfoByInterVal()
     }
+  } else {
     clearTimeout(timer)
-    GetInfoByInterVal()
   }
 })
 
@@ -464,18 +475,21 @@ function HandleVersion() {
     return
   } else {
     isUpdate.value = true
-    GetProgress()
-    updateVersion().then(res => {
-      showNotify({
-        type: 'success',
-        message: res.msg,
-        duration: 3000,
+    updateCheck().then(res => {
+      progress.value = 20
+      GetProgress()
+      updateVersion().then(res => {
+        showNotify({
+          type: 'success',
+          message: res.msg,
+          duration: 3000,
+        })
+        isUpdate.value = false
       })
-      isUpdate.value = false
     })
   }
 }
-function GetProgress() { 
+function GetProgress() {
   getProgress().then(res => {
     progress.value = res.data
     if (res.data < 100 && isUpdate.value) {
@@ -484,14 +498,38 @@ function GetProgress() {
       }, 1000);
     } else {
       showConfirmDialog({
-          title: '提示',
-          message:
-            `更新成功`,
+        title: '提示',
+        message:
+          `更新成功`,
+      })
+        .then(() => {
+          location.reload()
         })
-          .then(() => {
-            location.reload()
-          })
     }
+  })
+}
+
+function handleBluetooth() {
+
+  updateBluetooth().then(res => {
+    showDenoisePopup.value = false
+    showNotify({
+      type: 'success',
+      message: res.msg,
+      duration: 3000,
+    })
+  })
+}
+
+function handleLog() {
+
+  uploadLog().then(res => {
+    showDenoisePopup.value = false
+    showNotify({
+      type: 'success',
+      message: res.msg,
+      duration: 3000,
+    })
   })
 }
 </script>

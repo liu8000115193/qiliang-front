@@ -168,3 +168,17 @@ export function getProgress(){
     base:'update'
   })
 }
+
+export function updateCheck(){
+  return request({
+    url: `/update/check`,
+    method: "POST",
+  })
+}
+
+export function uploadLog(){
+  return request({
+    url: `/upload/log`,
+    method: "POST",
+  })
+}

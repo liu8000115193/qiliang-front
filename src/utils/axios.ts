@@ -4,7 +4,7 @@ import {showNotify } from 'vant';
 console.log('import.meta.env :>> ', import.meta.env);
 // 创建axios实例
 const service: AxiosInstance = axios.create({
-  baseURL: import.meta.env.DEV ? 'http://192.168.0.105:9996' : `http://${location.host}:9996`,
+  baseURL: import.meta.env.DEV ? 'http://192.168.0.153:9996' : `http://${location.host}:9996`,
   timeout: 120000,
   // paramsSerializer: function (params) {
   //   return Qs.stringify(params, { arrayFormat: "brackets" });
