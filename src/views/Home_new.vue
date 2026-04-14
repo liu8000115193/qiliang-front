@@ -103,6 +103,9 @@
       <div class="scan_menu" @click="HandleVersion">
         <div>更新版本</div>
       </div>
+      <div class="scan_menu" @click="handleLog">
+        <div>上传日志</div>
+      </div>
     </div>
 
   </Popup>
@@ -144,7 +147,7 @@ import Code from './components/Code.vue';
 import List from './components/list.vue';
 import { Switch, Field, CountDown, Circle, showNotify, showConfirmDialog, NoticeBar, Stepper } from 'vant';
 import SimpleKeyboard from "@/components/Keyboard.vue";
-import { scanning, getScanType, getSetting, updateSetting, wakeScreen, stopScan, getEquipment, getNotify, deleteNotify,updateVersion, getProgress } from '@/service/use';
+import { scanning, getScanType, getSetting, updateSetting, wakeScreen, stopScan, getEquipment, getNotify, deleteNotify, updateVersion, getProgress } from '@/service/use';
 // 关闭彩色，hdr；开启彩色；开启彩色，hdr
 const timeArr = [[75 * 1000, 101 * 1000, 158 * 1000], [101 * 1000, 151 * 1000, 266 * 1000], [157 * 1000, 208 * 1000, 325 * 1000], [113 * 1000, 138 * 1000, 193 * 1000]]
 let isRotate = ref(false)
@@ -233,7 +236,8 @@ function HandleScan() {
     return
   }
   loading.value = true
-  scanning(params).then((res) => {
+  scanning(params).catch((res) => {
+    console.log('res :>> ', res);
     if (res.code == -5) {
       showConfirmDialog({
         title: '提示',
@@ -536,6 +540,7 @@ function HandleDirft(value) {
 let isUpdate = ref(false)
 let progress = ref(0)
 function HandleVersion() {
+  showDenoisePopup.value = false
   if (isUpdate.value) {
     showNotify({
       type: 'warning',
@@ -545,25 +550,24 @@ function HandleVersion() {
     return
   } else {
     isUpdate.value = true
-    updateVersion().then(res => {
-      showNotify({
-        type: 'success',
-        message: res.msg,
-        duration: 3000,
-      })
-      isUpdate.value = false
-    }).catch(err => {
-      showNotify({
-        type: 'danger',
-        message: err.msg,
-        duration: 3000,
-      })
-      isUpdate.value = false
+    updateCheck().then(res => {
+      progress.value = 20
+      setTimeout(() => {
+        GetProgress()
+        updateVersion().then(res => {
+          showNotify({
+            type: 'success',
+            message: res.msg,
+            duration: 3000,
+          })
+          isUpdate.value = false
+        })
+      }, 6000);
     })
   }
 }
 
-function GetProgress() { 
+function GetProgress() {
   getProgress().then(res => {
     progress.value = res.data
     if (res.data < 100 && isUpdate.value) {
@@ -572,14 +576,26 @@ function GetProgress() {
       }, 1000);
     } else {
       showConfirmDialog({
-          title: '提示',
-          message:
-            `更新成功`,
+        title: '提示',
+        message:
+          `更新成功`,
+      })
+        .then(() => {
+          location.reload()
         })
-          .then(() => {
-            location.reload()
-          })
     }
+  })
+}
+
+function handleLog() {
+
+  uploadLog().then(res => {
+    showDenoisePopup.value = false
+    showNotify({
+      type: 'success',
+      message: res.msg,
+      duration: 3000,
+    })
   })
 }
 </script>
