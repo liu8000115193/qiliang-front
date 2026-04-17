@@ -7,7 +7,7 @@
       <div class="status" style="margin: 1vw 0;">状态：{{ status }}</div>
       <div class="status">网卡： {{ equipment.mac || '' }}</div>
       <div class="status">IP： {{ equipment.wlanIp }}</div>
-      <!-- <div class="status">PTP： {{ equipment.ptpStatus }}</div> -->
+      <div v-if="equipment.ptpStatus" class="status">PTP： {{ equipment.ptpStatus }}</div>
     </div>
   </Transition>
 
@@ -15,12 +15,12 @@
 </template>
 
 <script lang="ts" setup>
-import { getStat,startRotate } from '@/service/use';
+import { getStat, startRotate } from '@/service/use';
 import { showConfirmDialog } from 'vant';
 import { onLongPress } from '@vueuse/core'
 import { onMounted } from 'vue'
 
-const props = defineProps(['showInfo','equipment','isRotate'])
+const props = defineProps(['showInfo', 'equipment', 'isRotate'])
 const emits = defineEmits(['update:showInfo'])
 // let equipment = ref({})
 let stat = ref({})
@@ -61,8 +61,8 @@ function HandleRotate(e: PointerEvent) {
       `是否${props.isRotate ? '退出' : '进入'}续航测试模式？`,
   })
     .then(() => {
-      
-      startRotate(!props.isRotate).then(res =>{
+
+      startRotate(!props.isRotate).then(res => {
 
       })
       emits('update:isRotate', !props.isRotate)

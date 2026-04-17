@@ -1,11 +1,14 @@
 <script setup>
-// import HelloWorld from './components/HelloWorld.vue'
 import Home from './views/Home_new.vue'
+// import Home from './views/Home_hesai.vue';
 </script>
 
 <template>
   <Home />
 </template>
+
+<script setup lang="ts">
+</script>
 
 <style scoped>
 .logo {
@@ -14,9 +17,11 @@ import Home from './views/Home_new.vue'
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
+
 .logo.vue:hover {
   filter: drop-shadow(0 0 2em #42b883aa);
 }

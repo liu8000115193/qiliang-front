@@ -62,11 +62,11 @@
   <!--扫描速度设置-->
   <Popup v-model:showPopup="showPopup" title="彩色扫描">
     <div class="scan_menus">
-      <div class="scan_menu" :class="[params.scanMode === 0 ? 'scan_menu_active' : '']" @click="HandleParams(0)">快速
+      <div class="scan_menu" :class="[params.scanMode === 0 ? 'scan_menu_active' : '']" @click="UpdateScanMode(0)">快速
       </div>
-      <div class="scan_menu" :class="[params.scanMode === 1 ? 'scan_menu_active' : '']" @click="HandleParams(1)">标准
+      <div class="scan_menu" :class="[params.scanMode === 1 ? 'scan_menu_active' : '']" @click="UpdateScanMode(1)">标准
       </div>
-      <div class="scan_menu" :class="[params.scanMode === 2 ? 'scan_menu_active' : '']" @click="HandleParams(2)">高密
+      <div class="scan_menu" :class="[params.scanMode === 2 ? 'scan_menu_active' : '']" @click="UpdateScanMode(2)">高密
       </div>
     </div>
   </Popup>
@@ -74,15 +74,6 @@
   <!--去噪设置-->
   <Popup v-model:showPopup="showDenoisePopup" title="更多设置">
     <div class="scan_menus">
-      <div class="scan_menu" :class="[params.stitchDenoise ? 'scan_menu_active' : '']"
-        @click="HandleParams('stitchDenoise')">黏连
-      </div>
-      <div class="scan_menu" :class="[params.rainFogDenoise ? 'scan_menu_active' : '']"
-        @click="HandleParams('rainFogDenoise')">灰尘
-      </div>
-      <div class="scan_menu" :class="[params.otherDenoise ? 'scan_menu_active' : '']"
-        @click="HandleParams('otherDenoise')">其他
-      </div>
       <div class="scan_menu" @click="UpdateParams('inclinometerSwitch')">
         <div>倾角仪开关</div>
         <Switch :model-value="params.inclinometerSwitch" size="3vw"></Switch>
@@ -91,14 +82,26 @@
         <div>HDR</div>
         <Switch :model-value="params.hdrMode" size="3vw"></Switch>
       </div>
+      <div class="scan_menu" @click="UpdateParams('driftFilter')">
+        <div>去噪</div>
+        <Switch :model-value="params.driftFilter" size="3vw"></Switch>
+      </div>
       <div class="scan_menu" @click="HandleList">
         <div>扫描列表</div>
       </div>
+      <div class="scan_menu" @click="HandleCalibrate">
+        <div>标定列表</div>
+      </div>
+      <div class="scan_menu" @click="HandleKeyboard('driftFilterRange')">
+        <div>去噪范围</div>
+        <div>{{ params.driftFilterRange }}</div>
+      </div>
+      <div class="scan_menu" @click="HandleKeyboard('driftFilterValue')">
+        <div>去噪值</div>
+        <div>{{ params.driftFilterValue }}</div>
+      </div>
       <div class="scan_menu" @click="HandleVersion">
         <div>更新版本</div>
-      </div>
-      <div class="scan_menu" @click="handleLog">
-        <div>上传日志</div>
       </div>
     </div>
   </Popup>
@@ -123,27 +126,29 @@
   <Popup v-model:showPopup="isUpdate" title="更新进度">
     <Progress :percentage="progress"></Progress>
   </Popup>
-  <SimpleKeyboard v-model:showNumber="showIndexPopup" v-if="showKeyboard" v-model:showKeyboard="showKeyboard"
+  <!-- <NumberKeyboard v-model="params[paramKey]" :show="showNumberKeyboard" close-button-text="完成"
+    @blur="handleCloseNumKeyboard" theme="custom" z-index="1100" style="color: #000;" /> -->
+  <SimpleKeyboard :showNumber="paramKey != 'name'" v-if="showKeyboard" v-model:showKeyboard="showKeyboard"
     :onChange="handleKeyboardInput" />
-  <list v-if="showList" @close="showList = false" v-model:showList="showList" :showCalibrateBtn="false"></list>
+  <list v-if="showList" @close="showList = false" v-model:showList="showList"></list>
+  <calibrate v-if="showCalibrate" @close="showCalibrate = false" v-model:showList="showCalibrate"></calibrate>
 </template>
 
 <script setup>
+import calibrate from './components/calibrate.vue';
 import Head from './components/Head.vue'
 import MoreInfo from './components/MoreInfo.vue';
 import Popup from '@/components/Popup.vue';
 import Code from './components/Code.vue';
 import List from './components/list.vue';
-import { Switch, Field, CountDown, Circle, showNotify, showConfirmDialog, NoticeBar, Progress } from 'vant';
+import { Switch, Field, CountDown, Circle, showNotify, showConfirmDialog, NoticeBar, Stepper, Progress } from 'vant';
 import SimpleKeyboard from "@/components/Keyboard.vue";
-import {
-  scanning, getScanType, getSetting, updateSetting, wakeScreen, stopScan, getEquipment, getNotify,
-  deleteNotify, updateVersion, getProgress, updateCheck, uploadLog
-} from '@/service/use';
+import { scanning, getScanType, getSetting, updateSetting, wakeScreen, stopScan, getEquipment, getNotify, deleteNotify, updateVersion, getProgress, updateCheck } from '@/service/use';
 // 关闭彩色，hdr；开启彩色；开启彩色，hdr
-const timeArr = [[65 * 1000, 82 * 1000, 120 * 1000], [77 * 1000, 96 * 1000, 153 * 1000], [132 * 1000, 155 * 1000, 216 * 1000], [100 * 1000, 115 * 1000, 158 * 1000]]
+const timeArr = [[75 * 1000, 101 * 1000, 158 * 1000], [101 * 1000, 151 * 1000, 266 * 1000], [157 * 1000, 208 * 1000, 325 * 1000], [113 * 1000, 138 * 1000, 193 * 1000]]
 let isRotate = ref(false)
 
+// 参数
 let params = reactive({
   name: 'Scan',
   index: '',
@@ -153,7 +158,10 @@ let params = reactive({
   otherDenoise: 0,
   stitchDenoise: 0,
   inclinometerSwitch: false,
-  hdrMode: false
+  hdrMode: false,
+  driftFilter: false,
+  driftFilterRange: 0,
+  driftFilterValue: 0
 })
 
 onMounted(() => {
@@ -171,16 +179,16 @@ function GetEquipment() {
 
 // 显示更多信息
 let showInfo = ref(false)
-// 去噪设置
+// 去更多设置显示值
 let denoiseVal = computed(() => {
   let arr = []
-  if (params.stitchDenoise) {
-    arr.push('黏连')
+  if (params.inclinometerSwitch) {
+    arr.push('倾角仪')
   }
-  if (params.rainFogDenoise) {
-    arr.push('灰尘')
+  if (params.hdrMode) {
+    arr.push('HDR')
   }
-  if (params.otherDenoise) {
+  if (params.driftFilter) {
     arr.push('其他')
   }
   return arr.toString() || '未设置'
@@ -211,6 +219,15 @@ function HandleScan() {
     showNotify({
       type: 'warning',
       message: '请先退出展示模式',
+      duration: 1500,
+    })
+    return
+  }
+  console.log('equipment :>> ', equipment.value);
+  if (!equipment.value.ptpStatus.startsWith('Locked')) {
+    showNotify({
+      type: 'warning',
+      message: '时钟校准中，请稍等片刻再扫描',
       duration: 1500,
     })
     return
@@ -333,7 +350,24 @@ function HandleIndex() {
 let showKeyboard = ref(false)
 let paramKey = ref('name')
 let handleKeyboardInput = (input) => {
-  params[paramKey.value] = input
+  if (paramKey.value == 'driftFilterRange' || paramKey.value == 'driftFilterValue') {
+    let num = parseInt(input)
+    if (isNaN(num)) {
+      num = ''
+    } else {
+      if (num < 1 || num > 10) {
+        showNotify({
+          type: 'warning',
+          message: '取值范围1-10',
+          className: 'status'
+        })
+      }
+    }
+    params[paramKey.value] = input
+
+  } else {
+    params[paramKey.value] = input
+  }
 }
 // 显示键盘并清除定时器
 function HandleKeyboard(key) {
@@ -355,14 +389,18 @@ let title = ref('彩色扫描')
 function HandleScanMode() {
   showPopup.value = true
 }
-// 去噪设置
+// 更多设置弹窗
 let showDenoisePopup = ref(false)
 function HandleDenoise() {
   showDenoisePopup.value = true
 }
 
-let modeArr = ['快速', '标准', '高密']
-function HandleParams(value) {
+let modeArr = [
+  '快速',
+  '标准',
+  '高密'
+]
+function UpdateScanMode(value) {
   console.log('value instanceof Number :>> ',);
   if (typeof value == 'number') {
     params.scanMode = value
@@ -390,6 +428,7 @@ watch(params, (newValue, oldValue) => {
   if (!showKeyboard.value && newValue.name != '' && newValue.index != '' && !isNaN(Number(newValue.index, 10))) {
     Object.keys(newValue).forEach(x => {
       if (newValue[x] !== originParams[x]) {
+        console.log('更新params :>> ');
         clearTimeout(timer)
         updateSetting(newValue).then(res => {
           GetInfoByInterVal()
@@ -401,19 +440,26 @@ watch(params, (newValue, oldValue) => {
 })
 
 // 监听键盘变化，弹出时停止定时请求，收起后重新轮询
-watch(showKeyboard, (newValue, oldValue) => {
+watch(showKeyboard, async (newValue, oldValue) => {
   if (!newValue) {
-    showIndexPopup.value = false
-    showNamePopup.value = false
-    if (params.name != '' && params.index != '' && !isNaN(Number(params.index, 10))) {
-      updateSetting(params).then(res => {
+    try {
+      if (paramKey.value == 'name' || paramKey.value == 'index') {
+        showIndexPopup.value = false
+        showNamePopup.value = false
+        if (params.name != '' && params.index != '' && !isNaN(Number(params.index, 10))) {
+          await updateSetting(params)
+        }
+      } else if (paramKey.value == 'driftFilterRange' || paramKey.value == 'driftFilterValue') {
+        if (params.driftFilterRange != '' && params.driftFilterValue != '') {
+          await updateSetting(params)
+        }
+      }
+      setTimeout(() => {
         GetInfoByInterVal()
-      })
-    } else {
+      }, 2000);
+    } catch (error) {
       GetInfoByInterVal()
     }
-  } else {
-    clearTimeout(timer)
   }
 })
 
@@ -430,7 +476,7 @@ watch(showNamePopup, (newValue, oldValue) => {
 })
 
 
-
+// 通知
 let warningInfo = ref([])
 let primaryInfo = ref([])
 function GetNotify() {
@@ -462,8 +508,34 @@ function HandleList() {
   showList.value = true
 }
 
+let showCalibrate = ref(false)
+function HandleCalibrate() {
+  showDenoisePopup.value = false
+  showCalibrate.value = true
+}
+
+// 去噪参数设置
+let showDirftPopup = ref(false)
+function HandleDirftPopup() {
+  showDenoisePopup.value = false
+  showDirftPopup.value = true
+}
+function HandleDirft(value) {
+  let num = parseInt(value)
+  if (isNaN(num)) {
+    return ''
+  }
+  if (num < 1) {
+    num = 1
+  } else if (num > 10) {
+    num = 10
+  }
+  return num.toString()
+}
+
 let isUpdate = ref(false)
 let progress = ref(0)
+
 function HandleVersion() {
   showDenoisePopup.value = false
   if (isUpdate.value) {
@@ -491,6 +563,7 @@ function HandleVersion() {
     })
   }
 }
+
 function GetProgress() {
   getProgress().then(res => {
     progress.value = res.data
@@ -510,25 +583,11 @@ function GetProgress() {
     }
   })
 }
-
-
-function handleLog() {
-
-  uploadLog().then(res => {
-    showDenoisePopup.value = false
-    showNotify({
-      type: 'success',
-      message: res.msg,
-      duration: 3000,
-    })
-  })
-}
 </script>
 <style lang="less" scoped>
 .table {
   width: 100vw;
   height: 100vh;
-  overflow: hidden;
   font-size: 4vw;
 
   .alpcer {

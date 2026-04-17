@@ -2302,6 +2302,7 @@ __metadata:
     unplugin-auto-import: "npm:^0.17.5"
     unplugin-vue-components: "npm:^0.26.0"
     vant: "npm:^4.8.11"
+    viewerjs: "npm:^1.11.7"
     vite: "npm:^5.2.0"
     vue: "npm:^3.4.21"
     vue-tsc: "npm:^2.0.14"
@@ -3422,6 +3423,13 @@ __metadata:
   peerDependencies:
     vue: ^3.0.0
   checksum: 10c0/1369fbd622cd485968eaa3f2cfd3a260b6600802285c94fce40db87d92a2dd2338e2bcd1b3c390007ea6a7e432eaffd32be7b501b76d5c67fb6be91adffecc63
+  languageName: node
+  linkType: hard
+
+"viewerjs@npm:^1.11.7":
+  version: 1.11.7
+  resolution: "viewerjs@npm:1.11.7"
+  checksum: 10c0/9144560b351c3143d919ad2a46db8ecc587ced0a9b0febe44e6e979bad0dd11e09338de203b3f23af73730379edfb3cc21dd3c96640f1392d58873929b617f7b
   languageName: node
   linkType: hard
 

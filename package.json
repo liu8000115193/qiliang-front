@@ -16,6 +16,7 @@
     "qrcode": "^1.5.4",
     "simple-keyboard": "^3.7.83",
     "vant": "^4.8.11",
+    "viewerjs": "^1.11.7",
     "vue": "^3.4.21"
   },
   "devDependencies": {
